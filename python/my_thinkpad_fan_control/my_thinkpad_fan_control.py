@@ -4,38 +4,43 @@
 import os
 import sys
 
-from TempReader import *
-from FanControlConfiguration import *
-from View import *
+from temp_reader import *
+from load_reader import *
+from thinkpad_fan_control_configuration import *
+from view import *
 
 
-class MyFanControl:
-    """class to control ibm thinkpad fan. developed for thinkpad t60"""
-    
+class MyThinkpadFanControl(object):
+    """class to control ibm thinkpad fan. developed for thinkpad t60. my baby..."""
+
     def __init__(self, config):
-        print '[i] hello from MyFanControl constructor'
+        print '[i] hello from MyThinkpadFanControl constructor'
         self._config = config
-        self._tempReader = TempReader()
+        self._temp_reader = TempReader()
+        self._load_reader = LoadReader()
         self._view = View(self)
 
-        
-    def updateFanLevel(self, fanLevel):
-        print '[i] update fanlevel to: %s' % fanLevel
 
-        _fan_control_command_string = 'echo level %s | tee %s' % (self._config.FAN_SPEED_STATE_CONFIG_VALUES[fanLevel], self._config.FAN_CONTROL_FILE)
+
+    def update_fan_level(self, fan_level):
+        print '[i] update fanlevel to: %s' % fan_level
+
+        #DANGER DANGER DANGER
+        _fan_control_command_string = 'echo level %s | tee %s' % (self._config.FAN_SPEED_STATE_CONFIG_VALUES[fan_level], self._config.FAN_CONTROL_FILE)
         #print '[i] run command: ' + _fan_control_command_string
         os.system(_fan_control_command_string)
-        
 
-    def cleanUp(self):
-        print '[i] clean up!'
 
-        self.updateFanLevel('automatic')
+
+    def clean_up(self):
+        print '[i] clean up, set fan level to automatic!'
+
+        self.update_fan_level('automatic')
 
         sys.exit(1)
 
 
-        
+
 
 if __name__ == "__main__":
 
@@ -43,10 +48,10 @@ if __name__ == "__main__":
     if not os.geteuid() == 0:
         sys.exit('script must be run as root...')
 
-    config = FanControlConfiguration()
-    config.checkConfig()
+    config = ThinkpadFanControlConfiguration()
+    config.check_config()
 
-    myFanControl = MyFanControl(config)
+    my_fan_control = MyThinkpadFanControl(config)
 
 
 

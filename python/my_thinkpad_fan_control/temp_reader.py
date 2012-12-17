@@ -2,55 +2,57 @@
 import sys
 
 
-class TempReader:
+class TempReader(object):
 
     def __init__(self):
         print '[i] hello from TempReader constructor'
 
 
-    def _getRawTemp(self, _config):
+
+    def _get_raw_temp(self, _config):
 
         with open(_config.PROC_THERMAL_INFORMATION_FILE, 'r') as f:
-            rawThermalData = f.read()
+            raw_thermal_data = f.read()
             f.close()
 
-        rawThermalData = ' '.join(rawThermalData.split())
-        return rawThermalData
+        raw_thermal_data = ' '.join(raw_thermal_data.split())
+        return raw_thermal_data
 
 
 
-    def getCurrentCPUTemp(self, _config):
+    def get_current_cpu_temp(self, _config):
 
-        rawThermalData = self._getRawTemp(_config)
+        raw_thermal_data = self._get_raw_temp(_config)
 
-        if _config.procThermalPresent:
-            rawThermalData = ' '.join(rawThermalData.split())
+        if _config.proc_thermal_present:
+            raw_thermal_data = ' '.join(raw_thermal_data.split())
 
-            tokens = rawThermalData.split(' ')
-            cpuTemp = tokens[1]
+            tokens = raw_thermal_data.split(' ')
+            cpu_temp = tokens[1]
 
-            return int(cpuTemp)
+            return int(cpu_temp)
 
 
-        if _config.sensorsPresent:
+        if _config.sensors_present:
             #read sensors information
-            sys.exit("[!] getCurrentCPUTemp with sensors support not jet implemented...")
+            sys.exit("[!] get_current_cpu_temp with sensors support not jet implemented...")
 
 
-    def getCurrentGPUTemp(self, _config):
 
-        rawThermalData = self._getRawTemp(_config)
+    def get_current_gpu_temp(self, _config):
 
-        if _config.procThermalPresent:
-            rawThermalData = ' '.join(rawThermalData.split())
+        raw_thermal_data = self._get_raw_temp(_config)
 
-            tokens = rawThermalData.split(' ')
-            cpuTemp = tokens[4]
+        if _config.proc_thermal_present:
+            raw_thermal_data = ' '.join(raw_thermal_data.split())
 
-            return int(cpuTemp)
+            tokens = raw_thermal_data.split(' ')
+            cpu_temp = tokens[4]
+
+            return int(cpu_temp)
 
 
-            if _config.sensorsPresent:
-                #read sensors information
-                sys.exit("[!] getCurrentGPUTemp with sensors support not jet implemented...")
+        if _config.sensors_present:
+            #read sensors information
+            sys.exit("[!] get_current_gpu_temp with sensors support not jet implemented...")
 

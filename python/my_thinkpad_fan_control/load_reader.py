@@ -1,12 +1,10 @@
 
-import sys
-import os
-
 
 class LoadReader(object):
 
     def __init__(self):
         print '[i] hello from LoadReader constructor'
+
 
 
     def _get_raw_system_load(self, _config):
@@ -22,10 +20,12 @@ class LoadReader(object):
 
     def get_current_system_load(self, _config):
 
-        get_current_system_load_data = self._get_raw_system_load(_config)
-        #TODO
+        raw_system_load_data = self._get_raw_system_load(_config)
+        raw_system_load_data_list = raw_system_load_data.split(' ')
 
+        if len(raw_system_load_data_list) < 3:
+            system_load_data_string = "fail"
+        else:
+            system_load_data_string = '%s %s %s' % (raw_system_load_data_list[0], raw_system_load_data_list[1], raw_system_load_data_list[2])
 
-        return get_current_system_load_data
-
-
+        return system_load_data_string

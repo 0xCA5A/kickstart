@@ -18,112 +18,476 @@
 #include "UinputCommander.h"
 
 
-// UinputCommander::UinputCommander()
-// {
-// 
-// }
+
+// TODO
+// * check if usleep in constructor is necessary
+// * do you want to move cursor to center position in constructor
+
+
+
+
+
+
+UinputCommander::UinputCommander(const std::string& uinputDeviceName)
+{
+    std::cout << "constructor" << std::endl;
+    openDevice(uinputDeviceName);
+    configureDevice();
+
+    usleep(5000);
+    moveToCenterPosition();
+}
+
 
 UinputCommander::~UinputCommander()
 {
-    cout << "destructor" << endl;
+    std::cout << "destructor" << std::endl;
     closeDevice();
 }
 
 
-
-void UinputCommander::openDevice(string& uinputDeviceName)
+void UinputCommander::openDevice(const std::string& uinputDeviceName)
 {
+    std::cout << "[i] try to open uinput device " << uinputDeviceName << std::endl;
 
-    std::cout << "[i] try to open uinput device " << uinputDeviceName <<
-std::endl;
-
-    openedUinputDeviceFileDescriptor = open(uinputDeviceName.c_str(),
-                                            O_WRONLY | O_NONBLOCK);
+    openedUinputDeviceFileDescriptor = open(uinputDeviceName.c_str(), O_WRONLY | O_NONBLOCK);
     if(openedUinputDeviceFileDescriptor < 0)
     {
         die("[!] error in open");
     }
+}
+
+
+void UinputCommander::configureDevice()
+{
+    if (openedUinputDeviceFileDescriptor == 0)
+    {
+        die("[!] error, uinput device not opened (is 0)...");
+    }
+
+
+    //key stuff
+    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_KEY) < 0)
+    {
+        die("[i] error in ioctl");
+    }
+
+    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_KEYBIT, BTN_LEFT) < 0)
+    {
+        die("[i] error in ioctl");
+    }
+
+    //relative movement stuff
+    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_REL) < 0)
+    {
+        die("[i] error in ioctl");
+    }
+
+    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_RELBIT, REL_X) < 0)
+    {
+        die("[i] error in ioctl");
+    }
+
+    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_RELBIT, REL_Y) < 0)
+    {
+        die("[i] error in ioctl");
+    }
+
+    //absolute movement stuff, didnt get it to work...
+//     if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_ABS) < 0)
+//     {
+//         die("[i] error in ioctl");
+//     }
+// 
+//     if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_ABSBIT, ABS_X) < 0)
+//     {
+//         die("[i] error in ioctl");
+//     }
+// 
+//     if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_ABSBIT, ABS_Y) < 0)
+//     {
+//         die("[i] error in ioctl");
+//     }
+
+
+    memset(&uinputUserDevice, 0, sizeof(uinputUserDevice));
+    snprintf(uinputUserDevice.name, UINPUT_MAX_NAME_SIZE, UINPUT_NAME);
+    uinputUserDevice.id.bustype = BUS_USB;
+    uinputUserDevice.id.vendor  = 0x1;
+    uinputUserDevice.id.product = 0x1;
+    uinputUserDevice.id.version = 777;
+
+
+//     uinputUserDevice.absmin[ABS_X]=0;
+//     uinputUserDevice.absmax[ABS_X]=1023;
+//     uinputUserDevice.absfuzz[ABS_X]=0;
+//     uinputUserDevice.absflat[ABS_X ]=0;
+//     uinputUserDevice.absmin[ABS_Y]=0;
+//     uinputUserDevice.absmax[ABS_Y]=767;
+//     uinputUserDevice.absfuzz[ABS_Y]=0;
+//     uinputUserDevice.absflat[ABS_Y ]=0;
+
+
+    if(write(openedUinputDeviceFileDescriptor, &uinputUserDevice, sizeof(uinputUserDevice)) < 0)
+    {
+        die("error: write");
+    }
+
+    if(ioctl(openedUinputDeviceFileDescriptor, UI_DEV_CREATE) < 0)
+    {
+        die("error: ioctl");
+    }
+
 
 }
+
 
 
 void UinputCommander::closeDevice(void)
 {
+
+
+    std::cout << "openedUinputDeviceFileDescriptor: " << openedUinputDeviceFileDescriptor << std::endl;
+
+    if(ioctl(openedUinputDeviceFileDescriptor, UI_DEV_DESTROY) < 0)
+    {
+           die("[!] error, cannot destroy uinput device");
+    }
+    else
+    {
+        std::cout << "[i] destroyed uinput device..." << std::endl;
+    }
+
     close(openedUinputDeviceFileDescriptor);
-//     return 0;
+
 }
 
+
+// FIXME: use function to set absolute cursor position
 int UinputCommander::setXPosition(unsigned int x)
 {
-    xPos = x;
+    decrementXPosition(-MAX_X_RESOLUTION);
+    incrementXPosition(x);
 
     return 0;
 }
 
+// FIXME: use function to set absolute cursor position
 int UinputCommander::setYPosition(unsigned int y)
 {
-    yPos = y;
+    decrementYPosition(-MAX_Y_RESOLUTION);
+    incrementYPosition(y);
 
     return 0;
 }
 
-int UinputCommander::incrementXPosition(unsigned int x)
+// FIXME: use function to set absolute cursor position
+int UinputCommander::setXYPosition(unsigned int x, unsigned int y)
 {
-    xPos = xPos + x;
+//     cout << "decrement x: " << MAX_X_RESOLUTION << endl;
+//     cout << "decrement y: " << MAX_Y_RESOLUTION << endl;
+// 
+//     
+//     cout << "set x: " << x << endl;
+//     cout << "set y: " << y << endl;
+    
+    
+    decrementXPosition(MAX_X_RESOLUTION);
+    decrementYPosition(MAX_Y_RESOLUTION);
+    incrementXPosition(x);
+    incrementYPosition(y);
 
     return 0;
 }
 
-int UinputCommander::incrementYPosition(unsigned int y)
+int UinputCommander::incrementXPosition(unsigned int dx)
 {
-    yPos = yPos + y;
-
-    return 0;
-}
-
-int UinputCommander::decrementXPosition(unsigned int x)
-{
-    xPos = xPos - x;
-
-    return 0;
-}
-
-int UinputCommander::decrementYPosition(unsigned int y)
-{
-    yPos = yPos - y;
-
+    updatePositionRelative(dx, 0);
     return 0;
 }
 
 int UinputCommander::incrementXPosition(void)
 {
-    xPos++;
+    updatePositionRelative(1, 0);
+    return 0;
+}
 
+int UinputCommander::incrementYPosition(unsigned int dy)
+{
+    updatePositionRelative(0, dy);
     return 0;
 }
 
 int UinputCommander::incrementYPosition(void)
 {
-    yPos++;
+    updatePositionRelative(0, 1);
+    return 0;
+}
 
+int UinputCommander::incrementXYPosition(unsigned int dx, unsigned int dy)
+{
+    updatePositionRelative(dx, dy);
+    return 0;
+}
+
+int UinputCommander::incrementXYPosition(void)
+{
+    updatePositionRelative(1, 1);
+    return 0;
+}
+
+int UinputCommander::decrementXPosition(unsigned int dx)
+{
+    updatePositionRelative(-dx, 0);
     return 0;
 }
 
 int UinputCommander::decrementXPosition(void)
 {
-    xPos--;
+    updatePositionRelative(-1, 0);
+    return 0;
+}
 
+int UinputCommander::decrementYPosition(unsigned int dy)
+{
+    updatePositionRelative(0, -dy);
     return 0;
 }
 
 int UinputCommander::decrementYPosition(void)
 {
-    yPos--;
+    updatePositionRelative(0, -1);
+    return 0;
+}
+
+int UinputCommander::decrementXYPosition(unsigned int dx , unsigned int dy)
+{
+    updatePositionRelative(-dx, -dy);
+    return 0;
+}
+
+int UinputCommander::decrementXYPosition(void)
+{
+    updatePositionRelative(-1, -1);
+    return 0;
+}
+
+
+
+
+
+
+
+
+/*
+int UinputCommander::moveCursor(unsigned int xPos, unsigned int yPos)
+{
+//     struct input_event inputEvent;
+
+//     static int old_x_pos = 0;
+//     static int old_y_pos = 0;
+
+//     int x = (xPos - old_x_pos) * ((1280*2) / (620 / 2));
+//     int y = (yPos - old_y_pos) * (1024 / (440 / 2));
+
+
+//     printf("[%s] move cursor to (%0d / %0d)! \n", __func__, x , y);
+//     printf("x diff: %0d\n", (kinect_x - old_x_pos));
+//     printf("x diff: %0d\n", (kinect_x - old_x_pos));
+
+//     old_x_pos = xPos;
+//     old_y_pos = yPos;
+
+
+    return -1;
+
+
+//     memset(&inputEvent, 0, sizeof(inputEvent));
+//     gettimeofday(&inputEvent.time, NULL);
+// 
+//     inputEvent.type = EV_REL;
+//     inputEvent.code = REL_X;
+//     inputEvent.value = x;
+//     if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+//     {
+//         die("[!] error write");
+//     }
+//     inputEvent.type = EV_REL;
+//     inputEvent.code = REL_Y;
+//     inputEvent.value = y;
+//     if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+//     {
+//         die("[!] error write");
+//     }
+//     inputEvent.type = EV_SYN;
+//     inputEvent.code = SYN_REPORT;
+//     inputEvent.value = 0;
+//     if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+//     {
+//         die("[!] error write");
+//     }
+//     return 0;
+}*/
+
+int UinputCommander::moveToCenterPosition(void)
+{
+    std::cout << "[i] " << __func__ << std::endl;
+    setXYPosition(MAX_X_RESOLUTION / 2, MAX_Y_RESOLUTION / 2);
+    return 0;
+}
+
+
+
+inline int UinputCommander::updatePositionRelative(int dx, int dy)
+{
+//     cout << __func__ << endl;
+// 
+//     cout << "> x: " << dx << endl;
+//     cout << "> y: " << dy << endl;
+
+    
+    struct input_event inputEvent;
+
+    memset(&inputEvent, 0, sizeof(struct input_event));
+
+    gettimeofday(&inputEvent.time, NULL);
+    inputEvent.type = EV_REL;
+    inputEvent.code = REL_X;
+    inputEvent.value = dx;
+    if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+    {
+        die("[!] error write");
+    }
+
+    memset(&inputEvent, 0, sizeof(struct input_event));
+    gettimeofday(&inputEvent.time, NULL);
+    inputEvent.type = EV_REL;
+    inputEvent.code = REL_Y;
+    inputEvent.value = dy;
+    if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+    {
+        die("[!] error write");
+    }
+
+    memset(&inputEvent, 0, sizeof(struct input_event));
+    gettimeofday(&inputEvent.time, NULL);
+    inputEvent.type = EV_SYN;
+    inputEvent.code = SYN_REPORT;
+    inputEvent.value = 0;
+    if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+    {
+        die("[!] error write");
+    }
 
     return 0;
 }
 
 
+
+// int UinputCommander::updatePositionAbsolute(int x, int y)
+// {
+//     cout << __func__ << endl;
+//
+//     struct input_event inputEvent;
+//
+//     memset(&inputEvent, 0, sizeof(struct input_event));
+//     inputEvent.type = EV_ABS;
+//     inputEvent.code = ABS_X;
+//     inputEvent.value = x;
+//     if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+//     {
+//         die("[!] error write");
+//     }
+// 
+//     memset(&inputEvent, 0, sizeof(struct input_event));
+//     inputEvent.type = EV_ABS;
+//     inputEvent.code = ABS_Y;
+//     inputEvent.value = y;
+//     if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+//     {
+//         die("[!] error write");
+//     }
+// 
+//     memset(&inputEvent, 0, sizeof(struct input_event));
+//     inputEvent.type = EV_SYN;
+//     inputEvent.code = SYN_REPORT;
+//     inputEvent.value = 0;
+//     if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+//     {
+//         die("[!] error write");
+//     }
+//
+//     return 0;
+// }
+
+
+
+int UinputCommander::clickLeft()
+{
+    std::cout << "[" << __func__ << "] clicked!\n" << std::endl;
+
+    struct input_event inputEvent;
+    
+//     memset(&inputEvent, 0, sizeof(inputEvent));
+//     gettimeofday(&inputEvent.time, NULL);
+
+
+
+    // Report BUTTON CLICK - PRESS event
+    memset(&inputEvent, 0, sizeof(inputEvent));
+    gettimeofday(&inputEvent.time, NULL);
+
+    inputEvent.type = EV_KEY;
+    inputEvent.code = BTN_LEFT;
+    inputEvent.value = 1;
+    if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+    {
+        die("[!] error write");
+    }
+
+    inputEvent.type = EV_SYN;
+    inputEvent.code = SYN_REPORT;
+    inputEvent.value = 0;
+    if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+    {
+        die("[!] error write");
+    }
+
+    return 0;
+}
+
+
+int UinputCommander::releaseLeft()
+{
+    std::cout << "[" << __func__ << "] released!\n" << std::endl;
+
+    struct input_event inputEvent;
+
+    // Report BUTTON CLICK - RELEASE event
+    memset(&inputEvent, 0, sizeof(inputEvent));
+    gettimeofday(&inputEvent.time, NULL);
+
+    inputEvent.type = EV_KEY;
+    inputEvent.code = BTN_LEFT;
+    inputEvent.value = 0;
+    if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+    {
+        die("[!] error write");
+    }
+    
+    inputEvent.type = EV_SYN;
+    inputEvent.code = SYN_REPORT;
+    inputEvent.value = 0;
+    if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+    {
+        die("[!] error write");
+    }
+    return 0;
+}
+
+
+
+/*
 int
 main2(void)
 {
@@ -151,6 +515,7 @@ main2(void)
         die("error: ioctl");
 
     memset(&uidev, 0, sizeof(uidev));
+        gettimeofday(&inputEvent.time, NULL);
     snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "uinput-sample");
     uidev.id.bustype = BUS_USB;
     uidev.id.vendor  = 0x1;
@@ -204,7 +569,7 @@ main2(void)
 
             memset(&ev, 0, sizeof(struct input_event));
             ev.type = EV_SYN;
-            ev.code = 0;
+            ev.code = SYN_REPORT;
             ev.value = 0;
             if(write(fd, &ev, sizeof(struct input_event)) < 0)
                 die("error: write");
@@ -223,4 +588,4 @@ main2(void)
     close(fd);
 
     return 0;
-}
+}*/

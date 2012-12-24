@@ -1,5 +1,4 @@
-CC      = g++
-CPP = g+++
+CC = g++
 CPPFLAGS = -Wall -Werror -O2
 
 INCLUDES = -I/home/scale/g++Projects/gLib/
@@ -7,10 +6,10 @@ INCLUDES = -I/home/scale/g++Projects/gLib/
 LDFLAGS = -ljsoncpp
 
 OBJECTS = UDPSocketServer.o SocketServer.o UnixDomainSocketServer.o UinputCommander.o JSONAnalyzer.o
-APPLICATION_NAME = mouse_mover
+APPLICATION_NAME = mouseMover
 
 
-all: clean $(APPLICATION_NAME)
+all: $(APPLICATION_NAME)
 
 
 # $@: $@.cpp
@@ -21,7 +20,7 @@ all: clean $(APPLICATION_NAME)
 
 
 $(APPLICATION_NAME): main.cpp $(OBJECTS)
-	$(CC) $(CFLAGS) main.cpp $(OBJECTS) -o $(APPLICATION_NAME) $(LDFLAGS)
+	$(CC) $(CPPFLAGS) main.cpp $(OBJECTS) -o $(APPLICATION_NAME) $(LDFLAGS)
 
 
 .PHONY: clean

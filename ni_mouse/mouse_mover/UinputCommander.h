@@ -48,6 +48,8 @@ class UinputCommander
 
         int clickLeft(void);
         int releaseLeft(void);
+        int clickRight(void);
+        int releaseRight(void);
 
 //         int moveCursor(unsigned int xPos, unsigned int yPos);
         int moveToCenterPosition(void);
@@ -60,6 +62,9 @@ private:
     void openDevice(const std::string& uinputDeviceName);
     void configureDevice(void);
     void closeDevice(void);
+
+
+    inline int changeButtonState(__u16 buttonCode, __s32 buttonValue);
 
     inline int updatePositionRelative(int dx, int dy);
 //        inline int updatePositionAbsolute(int x, int y);

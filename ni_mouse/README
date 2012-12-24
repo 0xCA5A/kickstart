@@ -1,0 +1,9 @@
+
+HOW TO
+* check uinput kernel module (/dev/uinput | /dev/input/uinput)
+* chown <user> /dev/uinput 
+* start mouseMover
+* start a client application (kinect | simple_client | msp430) to send JSON position data
+
+
+

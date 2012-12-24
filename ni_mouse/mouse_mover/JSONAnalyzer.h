@@ -32,7 +32,7 @@ class JSONAnalyzer
 //             m_bFirstAliveCall = true;
 //         };
 
-            int parseJSONData(const std::string& jsonDataString, unsigned int& jsonXPosValue, unsigned int& jsonYPosValue, bool& jsonKey1pressedValue, bool& jsonKey2pressedValue);
+            int parseJSONData(const std::string& jsonDataString, int& jsonDXPosValue, int& jsonDYPosValue, bool& jsonKey1pressedValue, bool& jsonKey2pressedValue);
 
 
     public:

@@ -13,4 +13,14 @@
     } while(0)
 
 
+#ifdef DEBUG
+    #define printFunctonNameMacro(void) do { \
+            std::cout << "[printFunctonNameMacro] enter " << __PRETTY_FUNCTION__ << std::endl; \
+        } while(0)
+    #else
+    #define printFunctonNameMacro(str, args...) do { \
+        } while(0)
+#endif
+
+
 #endif

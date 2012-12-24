@@ -5,6 +5,7 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
 
@@ -23,7 +24,7 @@
 
 UinputCommander::UinputCommander(const std::string& uinputDeviceName)
 {
-    std::cout << "constructor" << std::endl;
+    printFunctonNameMacro();
     openDevice(uinputDeviceName);
     configureDevice();
 
@@ -34,14 +35,16 @@ UinputCommander::UinputCommander(const std::string& uinputDeviceName)
 
 UinputCommander::~UinputCommander()
 {
-    std::cout << "destructor" << std::endl;
+    printFunctonNameMacro();
     releaseLeft();
+    releaseRight();
     closeDevice();
 }
 
 
 void UinputCommander::openDevice(const std::string& uinputDeviceName)
 {
+    printFunctonNameMacro();
     std::cout << "[i] try to open uinput device " << uinputDeviceName << std::endl;
 
     openedUinputDeviceFileDescriptor = open(uinputDeviceName.c_str(), O_WRONLY | O_NONBLOCK);
@@ -54,6 +57,8 @@ void UinputCommander::openDevice(const std::string& uinputDeviceName)
 
 void UinputCommander::configureDevice()
 {
+    printFunctonNameMacro();
+
     if (openedUinputDeviceFileDescriptor == 0)
     {
         die("[!] error, uinput device not opened (fd is 0)...");
@@ -146,7 +151,7 @@ void UinputCommander::configureDevice()
 
 void UinputCommander::closeDevice(void)
 {
-
+    printFunctonNameMacro();
 
 //     std::cout << "openedUinputDeviceFileDescriptor: " << openedUinputDeviceFileDescriptor << std::endl;
 
@@ -168,6 +173,7 @@ void UinputCommander::closeDevice(void)
 // FIXME: use better function to set absolute cursor position
 int UinputCommander::setXPosition(unsigned int x)
 {
+    printFunctonNameMacro();
     decrementXPosition(-MAX_X_RESOLUTION);
     incrementXPosition(x);
 
@@ -178,6 +184,7 @@ int UinputCommander::setXPosition(unsigned int x)
 // FIXME: use better function to set absolute cursor position
 int UinputCommander::setYPosition(unsigned int y)
 {
+    printFunctonNameMacro();
     decrementYPosition(-MAX_Y_RESOLUTION);
     incrementYPosition(y);
 
@@ -188,6 +195,7 @@ int UinputCommander::setYPosition(unsigned int y)
 // FIXME: use better function to set absolute cursor position
 int UinputCommander::setXYPosition(unsigned int x, unsigned int y)
 {
+//     std::cout << "[i] " << __func__ << std::endl;
 //     std::cout << "decrement x: " << MAX_X_RESOLUTION << std::endl;
 //     std::cout << "decrement y: " << MAX_Y_RESOLUTION << std::endl;
 //     std::cout << "set x: " << x << std::endl;
@@ -204,6 +212,7 @@ int UinputCommander::setXYPosition(unsigned int x, unsigned int y)
 
 int UinputCommander::incrementXPosition(unsigned int dx)
 {
+    printFunctonNameMacro();
     updatePositionRelative(dx, 0);
     return 0;
 }
@@ -211,6 +220,7 @@ int UinputCommander::incrementXPosition(unsigned int dx)
 
 int UinputCommander::incrementXPosition(void)
 {
+    printFunctonNameMacro();
     updatePositionRelative(1, 0);
     return 0;
 }
@@ -218,6 +228,7 @@ int UinputCommander::incrementXPosition(void)
 
 int UinputCommander::incrementYPosition(unsigned int dy)
 {
+    printFunctonNameMacro();
     updatePositionRelative(0, dy);
     return 0;
 }
@@ -225,6 +236,7 @@ int UinputCommander::incrementYPosition(unsigned int dy)
 
 int UinputCommander::incrementYPosition(void)
 {
+    printFunctonNameMacro();
     updatePositionRelative(0, 1);
     return 0;
 }
@@ -232,6 +244,7 @@ int UinputCommander::incrementYPosition(void)
 
 int UinputCommander::incrementXYPosition(unsigned int dx, unsigned int dy)
 {
+    printFunctonNameMacro();
     updatePositionRelative(dx, dy);
     return 0;
 }
@@ -239,6 +252,7 @@ int UinputCommander::incrementXYPosition(unsigned int dx, unsigned int dy)
 
 int UinputCommander::incrementXYPosition(void)
 {
+    printFunctonNameMacro();
     updatePositionRelative(1, 1);
     return 0;
 }
@@ -246,6 +260,7 @@ int UinputCommander::incrementXYPosition(void)
 
 int UinputCommander::decrementXPosition(unsigned int dx)
 {
+    printFunctonNameMacro();
     updatePositionRelative(-dx, 0);
     return 0;
 }
@@ -253,6 +268,7 @@ int UinputCommander::decrementXPosition(unsigned int dx)
 
 int UinputCommander::decrementXPosition(void)
 {
+    printFunctonNameMacro();
     updatePositionRelative(-1, 0);
     return 0;
 }
@@ -260,6 +276,7 @@ int UinputCommander::decrementXPosition(void)
 
 int UinputCommander::decrementYPosition(unsigned int dy)
 {
+    printFunctonNameMacro();
     updatePositionRelative(0, -dy);
     return 0;
 }
@@ -267,6 +284,7 @@ int UinputCommander::decrementYPosition(unsigned int dy)
 
 int UinputCommander::decrementYPosition(void)
 {
+    printFunctonNameMacro();
     updatePositionRelative(0, -1);
     return 0;
 }
@@ -274,6 +292,7 @@ int UinputCommander::decrementYPosition(void)
 
 int UinputCommander::decrementXYPosition(unsigned int dx , unsigned int dy)
 {
+    printFunctonNameMacro();
     updatePositionRelative(-dx, -dy);
     return 0;
 }
@@ -281,6 +300,7 @@ int UinputCommander::decrementXYPosition(unsigned int dx , unsigned int dy)
 
 int UinputCommander::decrementXYPosition(void)
 {
+    printFunctonNameMacro();
     updatePositionRelative(-1, -1);
     return 0;
 }
@@ -288,7 +308,7 @@ int UinputCommander::decrementXYPosition(void)
 
 int UinputCommander::moveToCenterPosition(void)
 {
-    std::cout << "[i] " << __func__ << std::endl;
+    printFunctonNameMacro();
     setXYPosition(MAX_X_RESOLUTION / 2, MAX_Y_RESOLUTION / 2);
     return 0;
 }
@@ -297,12 +317,14 @@ int UinputCommander::moveToCenterPosition(void)
 
 inline int UinputCommander::updatePositionRelative(int dx, int dy)
 {
-//     cout << __func__ << endl;
-// 
-//     cout << "> x: " << dx << endl;
-//     cout << "> y: " << dy << endl;
+    printFunctonNameMacro();
 
-    
+#ifdef DEBUG
+    std::cout << "> dx: " << dx << std::endl;
+    std::cout << "> dy: " << dy << std::endl;
+#endif
+
+
     struct input_event inputEvent;
 
     memset(&inputEvent, 0, sizeof(struct input_event));
@@ -338,7 +360,6 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
 
     return 0;
 }
-
 
 
 // int UinputCommander::updatePositionAbsolute(int x, int y)
@@ -377,64 +398,38 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
 //     return 0;
 // }
 
+
 int UinputCommander::clickLeft()
 {
+    printFunctonNameMacro();
     return changeButtonState(BTN_LEFT, 1);
 }
+
 
 int UinputCommander::releaseLeft()
 {
+    printFunctonNameMacro();
     return changeButtonState(BTN_LEFT, 0);
 }
+
 
 int UinputCommander::clickRight()
 {
+    printFunctonNameMacro();
     return changeButtonState(BTN_LEFT, 1);
 }
 
+
 int UinputCommander::releaseRight()
 {
+    printFunctonNameMacro();
     return changeButtonState(BTN_LEFT, 0);
 }
-
-// inline int UinputCommander::clickButton(__u16 buttonCode)
-// {
-// //     std::cout << "[" << __func__ << "] clicked!\n" << std::endl;
-// 
-//     struct input_event inputEvent;
-//     
-// //     memset(&inputEvent, 0, sizeof(inputEvent));
-// //     gettimeofday(&inputEvent.time, NULL);
-// 
-// 
-// 
-//     // Report BUTTON CLICK - PRESS event
-//     memset(&inputEvent, 0, sizeof(inputEvent));
-//     gettimeofday(&inputEvent.time, NULL);
-// 
-//     inputEvent.type = EV_KEY;
-//     inputEvent.code = buttonCode;
-//     inputEvent.value = 1;
-//     if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
-//     {
-//         die("[!] error write");
-//     }
-// 
-//     inputEvent.type = EV_SYN;
-//     inputEvent.code = SYN_REPORT;
-//     inputEvent.value = 0;
-//     if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
-//     {
-//         die("[!] error write");
-//     }
-// 
-//     return 0;
-// }
 
 
 inline int UinputCommander::changeButtonState(__u16 buttonCode, __s32 buttonValue)
 {
-//     std::cout << "[" << __func__ << "] released!\n" << std::endl;
+    printFunctonNameMacro();
 
     struct input_event inputEvent;
 
@@ -460,107 +455,3 @@ inline int UinputCommander::changeButtonState(__u16 buttonCode, __s32 buttonValu
     return 0;
 }
 
-
-
-/*
-int
-main2(void)
-{
-    int                    fd;
-    struct uinput_user_dev uidev;
-    struct input_event     ev;
-    int                    dx = 0;
-    int                     dy = 0;
-    int                    i;
-
-    fd = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
-    if(fd < 0)
-        die("error: open");
-
-    if(ioctl(fd, UI_SET_EVBIT, EV_KEY) < 0)
-        die("error: ioctl");
-    if(ioctl(fd, UI_SET_KEYBIT, BTN_LEFT) < 0)
-        die("error: ioctl");
-
-    if(ioctl(fd, UI_SET_EVBIT, EV_REL) < 0)
-        die("error: ioctl");
-    if(ioctl(fd, UI_SET_RELBIT, REL_X) < 0)
-        die("error: ioctl");
-    if(ioctl(fd, UI_SET_RELBIT, REL_Y) < 0)
-        die("error: ioctl");
-
-    memset(&uidev, 0, sizeof(uidev));
-        gettimeofday(&inputEvent.time, NULL);
-    snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "uinput-sample");
-    uidev.id.bustype = BUS_USB;
-    uidev.id.vendor  = 0x1;
-    uidev.id.product = 0x1;
-    uidev.id.version = 1;
-
-    if(write(fd, &uidev, sizeof(uidev)) < 0)
-        die("error: write");
-
-    if(ioctl(fd, UI_DEV_CREATE) < 0)
-        die("error: ioctl");
-
-    sleep(2);
-
-//     srand(time(NULL));
-
-    while(1) {
-        switch(rand() % 4) {
-        case 0:
-            dx = -10;
-            dy = -1;
-            break;
-        case 1:
-            dx = 10;
-            dy = 1;
-            break;
-        case 2:
-            dx = -1;
-            dy = 10;
-            break;
-        case 3:
-            dx = 1;
-            dy = -10;
-            break;
-        }
-
-        for(i = 0; i < 20; i++) {
-            memset(&ev, 0, sizeof(struct input_event));
-            ev.type = EV_REL;
-            ev.code = REL_X;
-            ev.value = dx;
-            if(write(fd, &ev, sizeof(struct input_event)) < 0)
-                die("error: write");
-
-            memset(&ev, 0, sizeof(struct input_event));
-            ev.type = EV_REL;
-            ev.code = REL_Y;
-            ev.value = dy;
-            if(write(fd, &ev, sizeof(struct input_event)) < 0)
-                die("error: write");
-
-            memset(&ev, 0, sizeof(struct input_event));
-            ev.type = EV_SYN;
-            ev.code = SYN_REPORT;
-            ev.value = 0;
-            if(write(fd, &ev, sizeof(struct input_event)) < 0)
-                die("error: write");
-
-            usleep(15000);
-        }
-
-        sleep(5);
-    }
-
-    sleep(2);
-
-    if(ioctl(fd, UI_DEV_DESTROY) < 0)
-        die("error: ioctl");
-
-    close(fd);
-
-    return 0;
-}*/

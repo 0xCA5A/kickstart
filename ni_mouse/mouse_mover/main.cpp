@@ -4,33 +4,34 @@
 #include "JSONAnalyzer.h"
 // #include "AbstractSocketServer.h"
 #include "UnixDomainSocketServer.h"
-
+#include "HelperStuff.h"
+#include "MouseMover.h"
 
 #include <signal.h>
 #include <stdlib.h>
 
 
 
-//FIXME: move this variable away from global space...
-std::string uinputDeviceName(UINPUT_DEVICE_NAME);
-UinputCommander myUinputCommander(uinputDeviceName);
-
-UnixDomainSocketServer myUnixDomainSocketServer;
-JSONAnalyzer myJSONAnalyzer;
 
 static void signalHandler(int signalNumber)
 {
+    printFunctonNameMacro();
     std::cout << "\n[i] caught signal number: " << signalNumber << std::endl;
 
 //     not necessary if uinputcommander is defined global...
 //     uinputCommander.~UinputCommander();
 
+//     myMouseMover.~MouseMover();
+
+    
     exit(EXIT_SUCCESS);
 }
 
 
 void registerSignals()
 {
+    printFunctonNameMacro();
+
     if(signal(SIGINT, signalHandler) == SIG_ERR)
     {
         std::cout << "[!] error registering SIGINT signal handler";
@@ -52,20 +53,37 @@ void registerSignals()
 //         exit(EXIT_FAILURE);
 //     }
 
-
 }
+
+
+
+
+//FIXME: move this variable away from global space...
+// i do not understand why the destructor is called automatically if the objects are
+// defined here...
+std::string uinputDeviceName(UINPUT_DEVICE_NAME);
+UinputCommander myUinputCommander(uinputDeviceName);
+
+
+// MouseMover myMouseMover();
 
 
 
 int main()
 {
+
+
+    
+    printFunctonNameMacro();
     bool runFlag = true;
 
-//     string uinputDeviceName(UINPUT_DEVICE_NAME);
+//     std::string uinputDeviceName(UINPUT_DEVICE_NAME);
 //     UinputCommander uinputCommander(uinputDeviceName);
 
-//     UnixDomainSocketServer myUnixDomainSocketServer;
+    //FIXME: can not call my own constructor...
+    UnixDomainSocketServer myUnixDomainSocketServer;
     AbstractSocketServer* p_mySocketServer = &myUnixDomainSocketServer;
+
     char dataBuffer[SOCKET_DATA_BUFFER_MAX_LENGTH];
 
 //     JSONAnalyzer myJSONAnalyzer;
@@ -76,25 +94,24 @@ int main()
     bool lastClickLeftState = false;
     bool lastClickRightState = false;
 
+    JSONAnalyzer myJSONAnalyzer;
+
 
     registerSignals();
     p_mySocketServer->setupAndOpenSocket();
 
+    int returnValue = 0;
 
     while(runFlag)
     {
 
         p_mySocketServer->receiveData(dataBuffer, sizeof(dataBuffer));
-//         try{
         std::string jsonDataString(dataBuffer);
-//         std::cout << "got data:" << jsonDataString << std::endl;
-//         }
-//         catch
-//         {
-//
-//         }
-//         std::cout << "string size: " << jsonDataString.size() << std::endl;
-        myJSONAnalyzer.parseJSONData(jsonDataString, dxPosValue, dyPosValue, key1pressedValue, key2pressedValue);
+        returnValue = myJSONAnalyzer.parseJSONData(jsonDataString, dxPosValue, dyPosValue, key1pressedValue, key2pressedValue);
+        if (returnValue == EXIT_FAILURE)
+        {
+            continue;
+        }
 
 
 //         std::cout << "dxpos value: " << dxPosValue << std::endl;

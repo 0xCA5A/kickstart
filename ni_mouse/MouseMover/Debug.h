@@ -1,9 +1,8 @@
-
 #ifndef _DEBUG_H_
 #define _DEBUG_H_
 
 #include <iostream>
-// // using namespace std;
+
 // stolen here
 // stackoverflow.com/questions/2179623/how-does-qdebug-stuff-add-a-newline-automatically
 struct debug
@@ -33,7 +32,6 @@ struct debug
     }
 #endif
 };
-
 
 
 #if defined(FUNCTIONTRACE)

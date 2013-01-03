@@ -84,7 +84,7 @@ int UnixDomainSocketServer::receiveData(char* dataBuffer, int dataBufferSize)
     }
 
     memset(dataBuffer, '\0', dataBufferSize);
-    int receiveCounter = recvfrom(m_fileDescriptor, dataBuffer, dataBufferSize - 1, 0, 0, 0);
+    int receiveCounter = recv(m_fileDescriptor, dataBuffer, dataBufferSize - 1, 0);
     if ( receiveCounter == -1)
     {
         die("[!] ]receiver: recvfrom");

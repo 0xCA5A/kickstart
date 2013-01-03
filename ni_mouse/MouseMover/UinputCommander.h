@@ -11,11 +11,7 @@
 // using namespace std;
 
 
-#define MAX_X_RESOLUTION 1920
-#define MAX_Y_RESOLUTION 1080
 
-
-#define UINPUT_NAME "myUinput"
 
 
 
@@ -25,7 +21,7 @@ class UinputCommander
 
     public:
 
-        UinputCommander(const std::string& uinputDeviceName);
+        UinputCommander(const std::string& uinputUNIXDeviceName, const std::string& uinputName, const unsigned int maxScreenResolutionX, const unsigned int maxScreenResolutionY);
         ~UinputCommander();
 
         int setXPosition(unsigned int x);
@@ -59,8 +55,8 @@ class UinputCommander
 protected:
 private:
 
-    void openDevice(const std::string& uinputDeviceName);
-    void configureDevice(void);
+    void openDevice(const std::string& uinputUNIXDeviceName);
+    void configureDevice(const std::string& uinputName);
     void closeDevice(void);
 
 
@@ -69,11 +65,11 @@ private:
     inline int updatePositionRelative(int dx, int dy);
 //        inline int updatePositionAbsolute(int x, int y);
 
-//     unsigned int xPos;
-//     unsigned int yPos;
-    int openedUinputDeviceFileDescriptor;
-    struct uinput_user_dev uinputUserDevice;
-//     struct input_event     inputEvent;
+
+    int m_openedUinputDeviceFileDescriptor;
+    struct uinput_user_dev m_uinputUserDevice;
+    const unsigned int m_maxScreenResolutionX;
+    const unsigned int m_maxScreenResolutionY;
 
 };
 

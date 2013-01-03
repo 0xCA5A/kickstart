@@ -23,11 +23,13 @@
 
 
 
-UinputCommander::UinputCommander(const std::string& uinputDeviceName)
+UinputCommander::UinputCommander(const std::string& uinputUNIXDeviceName, const std::string& uinputName, const unsigned int maxScreenResolutionX, const unsigned int maxScreenResolutionY) :
+m_maxScreenResolutionX(maxScreenResolutionX),
+m_maxScreenResolutionY(maxScreenResolutionY)
 {
     printFunctonNameMacro();
-    openDevice(uinputDeviceName);
-    configureDevice();
+    openDevice(uinputUNIXDeviceName);
+    configureDevice(uinputName);
 
     usleep(5000);
     moveToCenterPosition();
@@ -38,72 +40,71 @@ UinputCommander::~UinputCommander()
 {
     printFunctonNameMacro();
 
-    std::cout << "[i] release mouse buttons... " << std::endl;
+    std::cout << "[i] release mouse buttons" << std::endl;
     releaseLeft();
     releaseRight();
 
-    std::cout << "[i] move mouse cursor to center position... " << std::endl;
     moveToCenterPosition();
-    
+
     closeDevice();
 }
 
 
-void UinputCommander::openDevice(const std::string& uinputDeviceName)
+void UinputCommander::openDevice(const std::string& uinputUNIXDeviceName)
 {
     printFunctonNameMacro();
-    std::cout << "[i] try to open uinput device " << uinputDeviceName << std::endl;
+    std::cout << "[i] open uinput device " << uinputUNIXDeviceName << std::endl;
 
-    openedUinputDeviceFileDescriptor = open(uinputDeviceName.c_str(), O_WRONLY | O_NONBLOCK);
-    if(openedUinputDeviceFileDescriptor < 0)
+    m_openedUinputDeviceFileDescriptor = open(uinputUNIXDeviceName.c_str(), O_WRONLY | O_NONBLOCK);
+    if(m_openedUinputDeviceFileDescriptor < 0)
     {
         die("[!] error in open");
     }
 }
 
 
-void UinputCommander::configureDevice()
+void UinputCommander::configureDevice(const std::string& uinputName)
 {
     printFunctonNameMacro();
     std::cout << "[i] configure uinput device " << std::endl;
 
-    if (openedUinputDeviceFileDescriptor == 0)
+    if (m_openedUinputDeviceFileDescriptor == 0)
     {
-        die("[!] error, uinput device not opened (fd is 0)...");
+        die("[!] error, uinput device not opened (fd is 0)");
     }
 
     //key stuff
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_KEY) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_KEY) < 0)
     {
         die("[i] error in ioctl");
     }
 
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_KEYBIT, BTN_LEFT) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_SET_KEYBIT, BTN_LEFT) < 0)
     {
         die("[i] error in ioctl");
     }
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_KEY) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_KEY) < 0)
     {
         die("[i] error in ioctl");
     }
 
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_KEYBIT, BTN_RIGHT) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_SET_KEYBIT, BTN_RIGHT) < 0)
     {
         die("[i] error in ioctl");
     }
 
     //relative movement stuff
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_REL) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_SET_EVBIT, EV_REL) < 0)
     {
         die("[i] error in ioctl");
     }
 
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_RELBIT, REL_X) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_SET_RELBIT, REL_X) < 0)
     {
         die("[i] error in ioctl");
     }
 
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_SET_RELBIT, REL_Y) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_SET_RELBIT, REL_Y) < 0)
     {
         die("[i] error in ioctl");
     }
@@ -125,12 +126,18 @@ void UinputCommander::configureDevice()
 //     }
 
 
-    memset(&uinputUserDevice, 0, sizeof(uinputUserDevice));
-    snprintf(uinputUserDevice.name, UINPUT_MAX_NAME_SIZE, UINPUT_NAME);
-    uinputUserDevice.id.bustype = BUS_USB;
-    uinputUserDevice.id.vendor  = 0x1;
-    uinputUserDevice.id.product = 0x1;
-    uinputUserDevice.id.version = 777;
+    // check string size to avoid char array overflow
+    if (uinputName.size() >= UINPUT_MAX_NAME_SIZE)
+    {
+        die("[i] check length of uinput name string");
+    }
+
+//     snprintf(m_uinputUserDevice.name, uinputName.size(), uinputName.c_str());
+    strncpy(m_uinputUserDevice.name, uinputName.c_str(), uinputName.size());
+    m_uinputUserDevice.id.bustype = BUS_USB;
+    m_uinputUserDevice.id.vendor  = 0x1;
+    m_uinputUserDevice.id.product = 0x1;
+    m_uinputUserDevice.id.version = 777;
 
 
 //     uinputUserDevice.absmin[ABS_X]=0;
@@ -143,12 +150,12 @@ void UinputCommander::configureDevice()
 //     uinputUserDevice.absflat[ABS_Y ]=0;
 
 
-    if(write(openedUinputDeviceFileDescriptor, &uinputUserDevice, sizeof(uinputUserDevice)) < 0)
+    if(write(m_openedUinputDeviceFileDescriptor, &m_uinputUserDevice, sizeof(m_uinputUserDevice)) < 0)
     {
         die("error: write");
     }
 
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_DEV_CREATE) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_DEV_CREATE) < 0)
     {
         die("error: ioctl");
     }
@@ -163,17 +170,17 @@ void UinputCommander::closeDevice(void)
 
 //     std::cout << "openedUinputDeviceFileDescriptor: " << openedUinputDeviceFileDescriptor << std::endl;
 
-    if(ioctl(openedUinputDeviceFileDescriptor, UI_DEV_DESTROY) < 0)
+    if(ioctl(m_openedUinputDeviceFileDescriptor, UI_DEV_DESTROY) < 0)
     {
            die("[!] error, cannot destroy uinput device");
     }
     else
     {
-        std::cout << "[i] successfully destroyed uinput device..." << std::endl;
+        std::cout << "[i] successfully destroyed uinput device" << std::endl;
     }
 
-    std::cout << "[i] close uinput device..." << std::endl;
-    close(openedUinputDeviceFileDescriptor);
+    std::cout << "[i] close uinput device" << std::endl;
+    close(m_openedUinputDeviceFileDescriptor);
 
 }
 
@@ -182,7 +189,7 @@ void UinputCommander::closeDevice(void)
 int UinputCommander::setXPosition(unsigned int x)
 {
     printFunctonNameMacro();
-    decrementXPosition(-MAX_X_RESOLUTION);
+    decrementXPosition(-m_maxScreenResolutionX);
     incrementXPosition(x);
 
     return 0;
@@ -193,7 +200,7 @@ int UinputCommander::setXPosition(unsigned int x)
 int UinputCommander::setYPosition(unsigned int y)
 {
     printFunctonNameMacro();
-    decrementYPosition(-MAX_Y_RESOLUTION);
+    decrementYPosition(-m_maxScreenResolutionY);
     incrementYPosition(y);
 
     return 0;
@@ -204,13 +211,13 @@ int UinputCommander::setYPosition(unsigned int y)
 int UinputCommander::setXYPosition(unsigned int x, unsigned int y)
 {
 //     std::cout << "[i] " << __func__ << std::endl;
-//     std::cout << "decrement x: " << MAX_X_RESOLUTION << std::endl;
-//     std::cout << "decrement y: " << MAX_Y_RESOLUTION << std::endl;
+//     std::cout << "decrement x: " << m_maxScreenResolutionX << std::endl;
+//     std::cout << "decrement y: " << m_maxScreenResolutionY << std::endl;
 //     std::cout << "set x: " << x << std::endl;
 //     std::cout << "set y: " << y << std::endl;
 
-    decrementXPosition(MAX_X_RESOLUTION);
-    decrementYPosition(MAX_Y_RESOLUTION);
+    decrementXPosition(m_maxScreenResolutionX);
+    decrementYPosition(m_maxScreenResolutionY);
     incrementXPosition(x);
     incrementYPosition(y);
 
@@ -317,7 +324,12 @@ int UinputCommander::decrementXYPosition(void)
 int UinputCommander::moveToCenterPosition(void)
 {
     printFunctonNameMacro();
-    setXYPosition(MAX_X_RESOLUTION / 2, MAX_Y_RESOLUTION / 2);
+    std::cout << "[i] move mouse cursor to center position ("
+        << m_maxScreenResolutionX / 2
+        << "/"
+        << m_maxScreenResolutionY / 2
+        << ")" << std::endl;
+    setXYPosition(m_maxScreenResolutionX / 2, m_maxScreenResolutionY / 2);
     return 0;
 }
 
@@ -340,7 +352,7 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
         inputEvent.type = EV_REL;
         inputEvent.code = REL_X;
         inputEvent.value = dx;
-        if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+        if(write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
         {
             die("[!] error write");
         }
@@ -353,7 +365,7 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
         inputEvent.type = EV_REL;
         inputEvent.code = REL_Y;
         inputEvent.value = dy;
-        if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+        if(write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
         {
             die("[!] error write");
         }
@@ -366,7 +378,7 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
         inputEvent.type = EV_SYN;
         inputEvent.code = SYN_REPORT;
         inputEvent.value = 0;
-        if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+        if(write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
         {
             die("[!] error write");
         }
@@ -454,7 +466,7 @@ inline int UinputCommander::changeButtonState(__u16 buttonCode, __s32 buttonValu
     inputEvent.type = EV_KEY;
     inputEvent.code = buttonCode;
     inputEvent.value = buttonValue;
-    if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+    if (write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
     {
         die("[!] error write");
     }
@@ -462,7 +474,7 @@ inline int UinputCommander::changeButtonState(__u16 buttonCode, __s32 buttonValu
     inputEvent.type = EV_SYN;
     inputEvent.code = SYN_REPORT;
     inputEvent.value = 0;
-    if (write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
+    if (write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(inputEvent)) < 0)
     {
         die("[!] error write");
     }

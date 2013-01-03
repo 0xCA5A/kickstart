@@ -4,23 +4,25 @@
 
 #include "AbstractSocketServer.h"
 
-#define UNIX_DOMAIN_SOCKET_PATH "/tmp/myUnixDomainSocket"
 
+
+#include <iostream>
 
 class UnixDomainSocketServer : public AbstractSocketServer
 {
     public:
-        UnixDomainSocketServer(void);
+        UnixDomainSocketServer(const std::string& socketPath);
         ~UnixDomainSocketServer(void);
 
-        virtual int setupAndOpenSocket(void);
+        virtual int openSocket(void);
         virtual int closeSocket(void);
         virtual int receiveData(char* dataBuffer, int dataBufferSize);
 
     protected:
 
     private:
-        int fileDescriptor;
+        int m_fileDescriptor;
+        std::string m_socketPath;
 };
 
 

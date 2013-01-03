@@ -1,5 +1,6 @@
 
 #include "HelperStuff.h"
+#include "Debug.h"
 
 #include "UinputCommander.h"
 
@@ -36,8 +37,14 @@ UinputCommander::UinputCommander(const std::string& uinputDeviceName)
 UinputCommander::~UinputCommander()
 {
     printFunctonNameMacro();
+
+    std::cout << "[i] release mouse buttons... " << std::endl;
     releaseLeft();
     releaseRight();
+
+    std::cout << "[i] move mouse cursor to center position... " << std::endl;
+    moveToCenterPosition();
+    
     closeDevice();
 }
 
@@ -58,6 +65,7 @@ void UinputCommander::openDevice(const std::string& uinputDeviceName)
 void UinputCommander::configureDevice()
 {
     printFunctonNameMacro();
+    std::cout << "[i] configure uinput device " << std::endl;
 
     if (openedUinputDeviceFileDescriptor == 0)
     {
@@ -319,43 +327,49 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
 {
     printFunctonNameMacro();
 
-#ifdef DEBUG
-    std::cout << "> dx: " << dx << std::endl;
-    std::cout << "> dy: " << dy << std::endl;
-#endif
-
+    debug() << "> dx: " << dx << std::endl;
+    debug() << "> dy: " << dy << std::endl;
 
     struct input_event inputEvent;
 
-    memset(&inputEvent, 0, sizeof(struct input_event));
 
-    gettimeofday(&inputEvent.time, NULL);
-    inputEvent.type = EV_REL;
-    inputEvent.code = REL_X;
-    inputEvent.value = dx;
-    if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+    if (dx != 0)
     {
-        die("[!] error write");
+        memset(&inputEvent, 0, sizeof(struct input_event));
+        gettimeofday(&inputEvent.time, NULL);
+        inputEvent.type = EV_REL;
+        inputEvent.code = REL_X;
+        inputEvent.value = dx;
+        if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+        {
+            die("[!] error write");
+        }
     }
 
-    memset(&inputEvent, 0, sizeof(struct input_event));
-    gettimeofday(&inputEvent.time, NULL);
-    inputEvent.type = EV_REL;
-    inputEvent.code = REL_Y;
-    inputEvent.value = dy;
-    if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+    if (dy != 0)
     {
-        die("[!] error write");
+        memset(&inputEvent, 0, sizeof(struct input_event));
+        gettimeofday(&inputEvent.time, NULL);
+        inputEvent.type = EV_REL;
+        inputEvent.code = REL_Y;
+        inputEvent.value = dy;
+        if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+        {
+            die("[!] error write");
+        }
     }
 
-    memset(&inputEvent, 0, sizeof(struct input_event));
-    gettimeofday(&inputEvent.time, NULL);
-    inputEvent.type = EV_SYN;
-    inputEvent.code = SYN_REPORT;
-    inputEvent.value = 0;
-    if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
-    {
-        die("[!] error write");
+    if ((dx != 0) || (dy != 0) )
+        {
+        memset(&inputEvent, 0, sizeof(struct input_event));
+        gettimeofday(&inputEvent.time, NULL);
+        inputEvent.type = EV_SYN;
+        inputEvent.code = SYN_REPORT;
+        inputEvent.value = 0;
+        if(write(openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
+        {
+            die("[!] error write");
+        }
     }
 
     return 0;

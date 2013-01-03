@@ -1,7 +1,8 @@
 CC = g++
 
 LDFLAGS = -ljsoncpp
-# DEBUGFLAGS = -DDEBUG
+DEBUGFLAGS += -DDEBUG
+# DEBUGFLAGS += -DFUNCTIONTRACE
 CPPFLAGS = -Wall -Werror -O2
 
 

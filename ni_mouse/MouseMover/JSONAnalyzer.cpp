@@ -1,5 +1,6 @@
 #include "JSONAnalyzer.h"
 #include "HelperStuff.h"
+#include "Debug.h"
 
 #include <stdlib.h>
 #include <jsoncpp/json/reader.h>
@@ -51,8 +52,8 @@ int JSONAnalyzer::parseJSONData(const std::string& jsonDataString, int& jsonDXPo
     }
 
     //get the value of the member of root named 'xPos', return '-1' if there is no such member
-    jsonDXPosValue = root.get("dxPos", "-1").asInt();
-    jsonDYPosValue = root.get("dyPos", "-1").asInt();
+    jsonDXPosValue = root.get("dxPos", "0").asInt();
+    jsonDYPosValue = root.get("dyPos", "0").asInt();
     jsonKey1pressedValue = root.get("key1pressed", false).asBool();
     jsonKey2pressedValue = root.get("key2pressed", false).asBool();
 

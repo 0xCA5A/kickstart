@@ -9,6 +9,8 @@
 #define SOCKET_DATA_BUFFER_MAX_LENGTH 128
 
 
+#define UNIX_DOMAIN_SOCKET_PATH "/tmp/myUnixDomainSocket"
+
 #endif
 
 

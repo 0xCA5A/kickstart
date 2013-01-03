@@ -1,5 +1,6 @@
 
 #include "main.h"
+#include "Debug.h"
 #include "UinputCommander.h"
 #include "JSONAnalyzer.h"
 // #include "AbstractSocketServer.h"
@@ -64,24 +65,21 @@ void registerSignals()
 std::string uinputDeviceName(UINPUT_DEVICE_NAME);
 UinputCommander myUinputCommander(uinputDeviceName);
 
-
+UnixDomainSocketServer myUnixDomainSocketServer(UNIX_DOMAIN_SOCKET_PATH);
 // MouseMover myMouseMover();
 
 
 
 int main()
 {
-
-
-    
     printFunctonNameMacro();
+
     bool runFlag = true;
 
 //     std::string uinputDeviceName(UINPUT_DEVICE_NAME);
 //     UinputCommander uinputCommander(uinputDeviceName);
 
     //FIXME: can not call my own constructor...
-    UnixDomainSocketServer myUnixDomainSocketServer;
     AbstractSocketServer* p_mySocketServer = &myUnixDomainSocketServer;
 
     char dataBuffer[SOCKET_DATA_BUFFER_MAX_LENGTH];
@@ -98,7 +96,7 @@ int main()
 
 
     registerSignals();
-    p_mySocketServer->setupAndOpenSocket();
+    p_mySocketServer->openSocket();
 
     int returnValue = 0;
 

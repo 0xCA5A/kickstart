@@ -1,6 +1,7 @@
 
 #include "UnixDomainSocketServer.h"
 #include "HelperStuff.h"
+#include "Debug.h"
 
 #include <iostream>
 
@@ -10,10 +11,13 @@
 #include <stdlib.h>
 
 
-UnixDomainSocketServer::UnixDomainSocketServer(void)
-    : AbstractSocketServer()
+UnixDomainSocketServer::UnixDomainSocketServer(const std::string& socketPath)
+    : AbstractSocketServer(),
+    m_fileDescriptor(0),
+    m_socketPath(socketPath)
+
 {
-    fileDescriptor = 0;
+    printFunctonNameMacro();
 }
 
 
@@ -24,37 +28,49 @@ UnixDomainSocketServer::~UnixDomainSocketServer(void)
 }
 
 
-int UnixDomainSocketServer::setupAndOpenSocket(void)
+int UnixDomainSocketServer::openSocket(void)
 {
     printFunctonNameMacro();
 
-    std::string  socketPath = UNIX_DOMAIN_SOCKET_PATH;
     struct sockaddr_un socketAddr;
+
+    std::cout << "[i] open UNIX domain socket " << m_socketPath << "..." << std::endl;
 
     memset(&socketAddr, 0, sizeof(socketAddr));
     socketAddr.sun_family = AF_UNIX;
 //   strncpy(socketAddr.sun_path, socket_path.c_str(), sizeof(socketAddr.sun_path)-1);
-    strcpy(socketAddr.sun_path, socketPath.c_str());
+    strcpy(socketAddr.sun_path, m_socketPath.c_str());
 
-    if ( (fileDescriptor = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1) {
+    if ( (m_fileDescriptor = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1) {
         die("[!] socket error");
     }
 
-    unlink(socketPath.c_str());
+    //try to unlink, remove the specified file
+    unlink(m_socketPath.c_str());
 
-    if (bind(fileDescriptor, (struct sockaddr*)&socketAddr, sizeof(socketAddr)) == -1) {
+    if (bind(m_fileDescriptor, (struct sockaddr*)&socketAddr, sizeof(socketAddr)) == -1) {
         die("[!] bind error");
     }
 
-    return fileDescriptor;
+    return m_fileDescriptor;
 }
 
 
 int UnixDomainSocketServer::closeSocket(void)
 {
     printFunctonNameMacro();
-    close(fileDescriptor);
-    return fileDescriptor;
+    std::cout << "[i] close UNIX domain socket " << m_socketPath << "..." << std::endl;
+    if (close(m_fileDescriptor))
+    {
+        die("[i] close error");
+    }
+
+    if (unlink(m_socketPath.c_str()))
+    {
+        die("[i] unlink error");
+    }
+
+    return m_fileDescriptor;
 }
 
 
@@ -62,13 +78,13 @@ int UnixDomainSocketServer::receiveData(char* dataBuffer, int dataBufferSize)
 {
 //     printFunctonNameMacro();
 
-    if (fileDescriptor == 0)
+    if (m_fileDescriptor == 0)
     {
         return -1;
     }
 
     memset(dataBuffer, '\0', dataBufferSize);
-    int receiveCounter = recvfrom(fileDescriptor, dataBuffer, dataBufferSize - 1, 0, 0, 0);
+    int receiveCounter = recvfrom(m_fileDescriptor, dataBuffer, dataBufferSize - 1, 0, 0, 0);
     if ( receiveCounter == -1)
     {
         die("[!] ]receiver: recvfrom");

@@ -1,7 +1,7 @@
 
 NOTE:
 
-This code comes originally from OpenNI project, check symlinks to resources directory.
+This code is originally from the OpenNI project, check symlinks to resources directory.
 If broken, code wont compile.
 Run make from ./Build or check env variable for Makefiles (GLUT) in the particular subdirs.
 

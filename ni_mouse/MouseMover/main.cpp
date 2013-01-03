@@ -73,7 +73,6 @@ void registerSignals()
 
 
 
-
 int main()
 {
     printFunctonNameMacro();

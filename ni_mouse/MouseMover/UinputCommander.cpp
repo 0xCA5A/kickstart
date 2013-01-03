@@ -40,10 +40,11 @@ UinputCommander::~UinputCommander()
 {
     printFunctonNameMacro();
 
-    std::cout << "[i] release mouse buttons" << std::endl;
+    std::cout << "[i] release mouse buttons... " << std::endl;
     releaseLeft();
     releaseRight();
 
+    std::cout << "[i] move mouse cursor to center position... " << std::endl;
     moveToCenterPosition();
 
     closeDevice();
@@ -352,6 +353,7 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
         inputEvent.type = EV_REL;
         inputEvent.code = REL_X;
         inputEvent.value = dx;
+
         if(write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
         {
             die("[!] error write");
@@ -365,6 +367,7 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
         inputEvent.type = EV_REL;
         inputEvent.code = REL_Y;
         inputEvent.value = dy;
+
         if(write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
         {
             die("[!] error write");
@@ -378,6 +381,7 @@ inline int UinputCommander::updatePositionRelative(int dx, int dy)
         inputEvent.type = EV_SYN;
         inputEvent.code = SYN_REPORT;
         inputEvent.value = 0;
+
         if(write(m_openedUinputDeviceFileDescriptor, &inputEvent, sizeof(struct input_event)) < 0)
         {
             die("[!] error write");

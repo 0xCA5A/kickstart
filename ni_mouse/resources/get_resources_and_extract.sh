@@ -1,5 +1,6 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 function get_files {
 
     echo -e "get necessary binaries..."
@@ -42,6 +43,86 @@ function extract {
     echo -e "extract files... "
     for f in $(ls *.bz2); do echo -e " * process $f"; tar -xf $f; done 
 
+=======
+
+# read here
+# http://www.codeproject.com/Articles/148251/How-to-Successfully-Install-Kinect-on-Windows-Open
+
+
+
+NITE_BIN_URL="http://www.openni.org/wp-content/uploads/NiTE2.0.zip"
+OPENNI_GIT_URL="https://github.com/OpenNI/OpenNI2.git"
+SENSOR_GIT_URL="https://github.com/avin2/SensorKinect.git"
+
+
+
+
+
+function get_bin_archive
+{
+    BIN_ARCHIVE_NAME=$(echo $1 | rev | cut -d '/' -f 1 | rev)
+
+    echo -e "[i] get bin $BIN_ARCHIVE_NAME"
+
+    if [ ! -f $BIN_ARCHIVE_NAME ]; then
+        echo -e " * get $BIN_ARCHIVE_NAME ($1)...\n"
+        wget $1
+    else
+        echo -e " * file $BIN_ARCHIVE_NAME exists, wont get..."
+    fi
+}
+
+
+function get_git_project
+{
+    GIT_PROJECT_NAME=$(echo $1 | rev | cut -d '/' -f 1 | rev | cut -d '.' -f 1)
+
+    echo -e "[i] get git project $GIT_PROJECT_NAME"
+
+    if [ ! -d $GIT_PROJECT_NAME ]; then
+        echo -e " * get $GIT_PROJECT_NAME via git...\n"
+        git clone $1
+    else
+        echo -e " * project $GIT_PROJECT_NAME already cloned, try to pull..."
+        cd $GIT_PROJECT_NAME; git pull; cd - &>/dev/null
+    fi
+
+}
+
+
+function get_files {
+
+    echo -e "[i] get necessary binaries..."
+
+    get_bin_archive $NITE_BIN_URL
+    get_git_project $SENSOR_GIT_URL
+    get_git_project $OPENNI_GIT_URL
+}
+
+
+# function extract_bin
+# {
+#     echo -e "[i] extract nite bin"
+# 
+#     unzip $NITE_ARCHIVE_NAME
+# 
+# }
+
+
+function extract {
+
+    echo -e "[i] extract nite archive... "
+#     for f in $(ls *.bz2); do echo -e " * process $f"; tar -xf $f; done
+
+
+    if [ ! -d NiTE2.0 ]; then
+        unzip NiTE2.0.zip
+    fi
+
+    if [ ! -d NiTE-2.0.0 ]; then
+        tar -xf NiTE2.0/NiTE-Linux-x64-2.0.0.tar.bz2
+    fi
+>>>>>>> cd21a8fc6751710794e99845045c4ba454484065
 }
 
 
@@ -63,6 +144,7 @@ function symlink {
 }
 
 
+<<<<<<< HEAD
 function install_openni {
 
     echo -e "install openni..."
@@ -110,5 +192,16 @@ symlink
 install_openni
 install_sensor
 install_sensorkinect
+=======
+#main
+get_files
+
+extract
+
+exit
+
+symlink
+
+>>>>>>> cd21a8fc6751710794e99845045c4ba454484065
 
 

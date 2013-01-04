@@ -88,7 +88,7 @@ int UnixDomainSocketServer::receiveData(char* dataBuffer, int dataBufferSize)
 
     if ( receiveCounter == -1)
     {
-        die("[!] ]receiver: recvfrom");
+        die("[!] receiver: recv");
     }
 
     return receiveCounter ;

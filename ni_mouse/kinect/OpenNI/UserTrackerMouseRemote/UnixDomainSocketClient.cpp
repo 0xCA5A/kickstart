@@ -46,12 +46,12 @@ int UnixDomainSocketClient::openSocket(void)
         die("[!] socket error");
     }
 
-    //try to unlink, remove the specified file
-    unlink(m_socketPath.c_str());
+//     //try to unlink, remove the specified file
+//     unlink(m_socketPath.c_str());
 
-    if (bind(m_fileDescriptor, (struct sockaddr*)&socketAddr, sizeof(socketAddr)) == -1) {
-        die("[!] bind error");
-    }
+//     if (bind(m_fileDescriptor, (struct sockaddr*)&socketAddr, sizeof(socketAddr)) == -1) {
+//         die("[!] bind error");
+//     }
 
     return m_fileDescriptor;
 }
@@ -66,16 +66,16 @@ int UnixDomainSocketClient::closeSocket(void)
         die("[i] close error");
     }
 
-    if (unlink(m_socketPath.c_str()))
-    {
-        die("[i] unlink error");
-    }
+//     if (unlink(m_socketPath.c_str()))
+//     {
+//         die("[i] unlink error");
+//     }
 
     return m_fileDescriptor;
 }
 
 
-int UnixDomainSocketClient::sendData(char* dataBuffer, int dataBufferSize)
+int UnixDomainSocketClient::sendData(const char* dataBuffer, int dataBufferSize)
 {
 //     printFunctonNameMacro();
 
@@ -84,13 +84,15 @@ int UnixDomainSocketClient::sendData(char* dataBuffer, int dataBufferSize)
         return -1;
     }
 
-    memset(dataBuffer, '\0', dataBufferSize);
-    int receiveCounter = recv(m_fileDescriptor, dataBuffer, dataBufferSize - 1, 0);
+//     memset(dataBuffer, '\0', dataBufferSize);
+//     int receiveCounter = recv(m_fileDescriptor, dataBuffer, dataBufferSize - 1, 0);
 
-    if (receiveCounter == -1)
+    int sendCounter = send(m_fileDescriptor, dataBuffer, dataBufferSize + 1, 0);
+
+    if (sendCounter == -1)
     {
-        die("[!] ]receiver: recvfrom");
+        die("[!] sender: send failed");
     }
 
-    return receiveCounter;
+    return sendCounter;
 }

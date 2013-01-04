@@ -16,9 +16,12 @@ class UnixDomainSocketClient : public AbstractSocketClient
 
         virtual int openSocket(void);
         virtual int closeSocket(void);
-        virtual int sendData(char* dataBuffer, int dataBufferSize);
+        virtual int sendData(const char* dataBuffer, int dataBufferSize);
 
     protected:
+
+    private:
+        UnixDomainSocketClient();
 
     private:
         int m_fileDescriptor;

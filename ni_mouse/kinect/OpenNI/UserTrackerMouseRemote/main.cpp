@@ -51,7 +51,16 @@ XnBool g_bDrawSkeleton = TRUE;
 XnBool g_bPrintID = TRUE;
 XnBool g_bPrintState = TRUE;
 
+
+// redefinition, create something common!
+#define UNIX_DOMAIN_SOCKET_PATH "/tmp/myUnixDomainSocket"
+
+
+
+
 JSONGenerator g_myJSONGenerator;
+std::string socketPath(UNIX_DOMAIN_SOCKET_PATH);
+UnixDomainSocketClient g_myUnixDomainSocketClient(socketPath);
 
 
 
@@ -91,6 +100,8 @@ void CleanupExit()
     g_Player.Release();
     g_Context.Release();
 
+    g_myUnixDomainSocketClient.closeSocket();
+    
     exit (1);
 }
 
@@ -284,8 +295,9 @@ void glutDisplay (void)
 
             debug() << jsonDataString << std::endl;
 
+            g_myUnixDomainSocketClient.sendData(jsonDataString.c_str(), jsonDataString.length());
 
-            
+
             break;
         }
 
@@ -381,6 +393,12 @@ void glInit (int * pargc, char ** argv)
 int main(int argc, char **argv)
 {
     XnStatus nRetVal = XN_STATUS_OK;
+
+
+    //try to connect to the socket
+    g_myUnixDomainSocketClient.openSocket();
+
+
 
     if (argc > 1)
     {

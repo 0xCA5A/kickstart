@@ -21,6 +21,9 @@ class UnixDomainSocketServer : public AbstractSocketServer
     protected:
 
     private:
+        UnixDomainSocketServer();
+
+    private:
         int m_fileDescriptor;
         std::string m_socketPath;
 };

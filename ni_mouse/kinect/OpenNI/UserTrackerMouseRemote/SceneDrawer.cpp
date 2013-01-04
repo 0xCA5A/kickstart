@@ -163,125 +163,25 @@ inline void DrawLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint e
 }
 
 
-inline void DrawCoordinateLines(unsigned int xRes, unsigned int yRes)
-{
-
-    //set color
-    glColor4f(1, 1, 1, 1);
-
-    //horizontal line
-    GLfloat vertsHorizontal[4] = {xRes / 2 - xRes / 20, yRes / 2, xRes / 2 + xRes / 20, yRes / 2};
-    glVertexPointer(2, GL_FLOAT, 0, vertsHorizontal);
-    glDrawArrays(GL_LINES, 0, 2);
-
-    //vertical line
-    GLfloat vertsVertical[4] = {xRes / 2, yRes / 2  - yRes / 20, xRes / 2, yRes / 2 + yRes / 20};
-    glVertexPointer(2, GL_FLOAT, 0, vertsVertical);
-    glDrawArrays(GL_LINES, 0, 2);
-
-    glFlush();
-
-}
-
-
-inline bool PointChecker(XnPoint3D* p_pt)
-{
-    const int cubeXDimension = 1000;
-    const int cubeYDimension = 1000;
-    const int cubeZDimension = 1000;
-
-    const int cubeXCenter = 0;
-    const int cubeYCenter = 0;
-    const int cubeZCenter = 3260;
-
-    bool xFlag = false;
-    bool yFlag = false;
-    bool zFlag = false;
-
-    //check z dimension
-    if (p_pt->Z > (cubeZCenter - cubeZDimension/2) && p_pt->Z < (cubeZCenter + cubeZDimension/2))
-    {
-//         printf(">>> player %u is in z!!!\n\n", player);
-        zFlag = true;
-    }
-
-    //check y dimension
-    if (p_pt->Y > (cubeYCenter - cubeYDimension/2) && p_pt->Y < (cubeYCenter + cubeYDimension/2))
-    {
-//         printf(">>> player %u is in y!!!\n\n", player);
-        yFlag = true;
-    }
-
-    //check x dimension
-    if (p_pt->X > (cubeXCenter - cubeXDimension/2) && p_pt->X < (cubeXCenter + cubeXDimension/2))
-    {
-//         printf(">>> player %u is in x!!!\n\n", player);
-        xFlag = true;
-
-    }
-
-    return zFlag && yFlag && xFlag;
-
-}
-
-
-
-inline void InOutChecker(XnUserID player)
-{
-    static unsigned long counter = 0;
-
-    XnSkeletonJointPosition jointRightHand, jointLeftHand, jointHead;
-    bool rightHandCheck, leftHandCheck, headCheck;
-
-    g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(player, XN_SKEL_RIGHT_HAND, jointRightHand);
-    g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(player, XN_SKEL_LEFT_HAND, jointLeftHand);
-    g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(player, XN_SKEL_HEAD, jointHead);
-
-    rightHandCheck = PointChecker(&jointRightHand.position);
-    leftHandCheck = PointChecker(&jointLeftHand.position);
-    headCheck = PointChecker(&jointHead.position);
-
-    if (rightHandCheck || leftHandCheck || headCheck)
-    {
-        printf("**********************************************************************\n");
-        printf("PLAYER %u IN CUBE!!!!\n", player);
-        printf("**********************************************************************\n");
-
-        if(rightHandCheck)
-        {
-            printf(" * jointRightHand.position (X: %f, Y: %f, Z: %f)\n", jointRightHand.position.X, jointRightHand.position.Y, jointRightHand.position.Z);
-        }
-        if(leftHandCheck)
-        {
-            printf(" * jointLeftHand.position (X: %f, Y: %f, Z: %f)\n", jointLeftHand.position.X, jointLeftHand.position.Y, jointLeftHand.position.Z);
-        }
-        if(headCheck)
-        {
-            printf(" * jointHead.position (X: %f, Y: %f, Z: %f)\n", jointHead.position.X, jointHead.position.Y, jointHead.position.Z);
-        }
-
-        printf("**********************************************************************\n\n");
-    }
-
-
-    //60: @30fps -> 2s
-    if (counter % 60 == 0)
-    {
-        printf("**********************************************************************\n");
-        printf("PLAYER %u POSITION INFORMATION\n", player);
-        printf("**********************************************************************\n");
-
-        printf(" * jointRightHand.position (X: %f, Y: %f, Z: %f)\n", jointRightHand.position.X, jointRightHand.position.Y, jointRightHand.position.Z);
-        printf(" * jointLeftHand.position (X: %f, Y: %f, Z: %f)\n", jointLeftHand.position.X, jointLeftHand.position.Y, jointLeftHand.position.Z);
-        printf(" * jointHead.position (X: %f, Y: %f, Z: %f)\n", jointHead.position.X, jointHead.position.Y, jointHead.position.Z);
-
-        printf("**********************************************************************\n\n");
-    }
-
-
-    counter++;
-
-}
+// inline void DrawCoordinateLines(unsigned int xRes, unsigned int yRes)
+// {
+// 
+//     //set color
+//     glColor4f(1, 1, 1, 1);
+// 
+//     //horizontal line
+//     GLfloat vertsHorizontal[4] = {xRes / 2 - xRes / 20, yRes / 2, xRes / 2 + xRes / 20, yRes / 2};
+//     glVertexPointer(2, GL_FLOAT, 0, vertsHorizontal);
+//     glDrawArrays(GL_LINES, 0, 2);
+// 
+//     //vertical line
+//     GLfloat vertsVertical[4] = {xRes / 2, yRes / 2  - yRes / 20, xRes / 2, yRes / 2 + yRes / 20};
+//     glVertexPointer(2, GL_FLOAT, 0, vertsVertical);
+//     glDrawArrays(GL_LINES, 0, 2);
+// 
+//     glFlush();
+// 
+// }
 
 
 const XnChar* GetCalibrationErrorString(XnCalibrationStatus error)
@@ -540,23 +440,6 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
             DrawLimb(aUsers[i], XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP);
 
-
-            //check if user is in cube or not
-//             InOutChecker(aUsers[i]);
-
-
-/*
-            //send data once per frame... only player 0 and only if tracked!
-            if (i == 0)
-            {
-
-                
-
-                
-            }*/
-
-            
-
 #ifndef USE_GLES
             glEnd();
 #endif
@@ -565,9 +448,5 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
     }
 
-    //draw coordinates in each frame
-    DrawCoordinateLines(g_nXRes, g_nYRes);
-
-//     DrawClickLeftLine()
 
 }

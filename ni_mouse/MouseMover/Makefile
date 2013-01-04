@@ -1,8 +1,8 @@
 CC = g++
 
 LDFLAGS = -ljsoncpp
-DEBUGFLAGS += -DDEBUG
-# DEBUGFLAGS += -DFUNCTIONTRACE
+# DEFINES += -DDEBUG
+# DEFINES += -DFUNCTIONTRACE
 CPPFLAGS = -Wall -Werror -O2
 
 
@@ -11,18 +11,18 @@ HEADERS = $(shell find . -name '*.h')
 SOURCES = $(shell find . -name '*.cpp' | grep -v main.cpp)
 OBJECTS = $(SOURCES:%.cpp=%.o)
 
-APPLICATION_NAME = mouseMover
+APPLICATION_NAME = MouseMover
 
 
 all: $(APPLICATION_NAME)
 
 
 %.o: %.cpp %.h
-	$(CC) -c $(CPPFLAGS) $(DEBUGFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(DEFINES) $<
 
 
 $(APPLICATION_NAME): main.cpp $(OBJECTS) $(HEADERS)
-	$(CC) $(CPPFLAGS) main.cpp $(OBJECTS) -o $(APPLICATION_NAME) $(LDFLAGS)
+	$(CC) $(CPPFLAGS) main.cpp $(OBJECTS) -o $(APPLICATION_NAME) $(LDFLAGS) $(DEFINES)
 
 
 .PHONY: clean

@@ -25,6 +25,9 @@ endif
 
 USED_LIBS += OpenNI
 
+# DEFINES += DEBUG
+# DEFINES += FUNCTIONTRACE
+
 LIB_DIRS += ../Lib
 include ../Build/Common/CommonCppMakefile
 

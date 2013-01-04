@@ -46,12 +46,9 @@ int UnixDomainSocketClient::openSocket(void)
         die("[!] socket error");
     }
 
-//     //try to unlink, remove the specified file
-//     unlink(m_socketPath.c_str());
-
-//     if (bind(m_fileDescriptor, (struct sockaddr*)&socketAddr, sizeof(socketAddr)) == -1) {
-//         die("[!] bind error");
-//     }
+    if (connect(m_fileDescriptor, (struct sockaddr*)&socketAddr, sizeof(socketAddr)) == -1) {
+        die("[!] connect error");
+    }
 
     return m_fileDescriptor;
 }
@@ -65,11 +62,6 @@ int UnixDomainSocketClient::closeSocket(void)
     {
         die("[i] close error");
     }
-
-//     if (unlink(m_socketPath.c_str()))
-//     {
-//         die("[i] unlink error");
-//     }
 
     return m_fileDescriptor;
 }
@@ -87,7 +79,7 @@ int UnixDomainSocketClient::sendData(const char* dataBuffer, int dataBufferSize)
 //     memset(dataBuffer, '\0', dataBufferSize);
 //     int receiveCounter = recv(m_fileDescriptor, dataBuffer, dataBufferSize - 1, 0);
 
-    int sendCounter = send(m_fileDescriptor, dataBuffer, dataBufferSize + 1, 0);
+    int sendCounter = send(m_fileDescriptor, dataBuffer, dataBufferSize, 0);
 
     if (sendCounter == -1)
     {

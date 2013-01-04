@@ -52,8 +52,12 @@ XnBool g_bPrintID = TRUE;
 XnBool g_bPrintState = TRUE;
 
 
+
 // redefinition, create something common!
 #define UNIX_DOMAIN_SOCKET_PATH "/tmp/myUnixDomainSocket"
+
+
+#define SKELETON_SMOOTH_FACTOR 0.8
 
 
 
@@ -154,6 +158,7 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
         // Calibration succeeded
         printf("%d Calibration complete, start tracking user %d\n", epochTime, nId);        
         g_UserGenerator.GetSkeletonCap().StartTracking(nId);
+        g_UserGenerator.GetSkeletonCap().SetSmoothing(SKELETON_SMOOTH_FACTOR);
     }
     else
     {
@@ -251,12 +256,13 @@ void glutDisplay (void)
     g_UserGenerator.GetUserPixels(0, sceneMD);
     DrawDepthMap(depthMD, sceneMD);
 
-
+    static XnUserID lastTrackingUser = 777;
     XnUserID aUsers[3];
     XnUInt16 nUsers = 3;
     g_UserGenerator.GetUsers(aUsers, nUsers);
     XnSkeletonJointPosition jointRightHand, jointLeftHand;
-//     XnUserID activeUser;
+//     XnSkeletonJointPosition jointRightHip, jointLeftHip;
+    XnSkeletonJointPosition jointTorso;
 
     static XnVector3D lastRightHandPosition;
     std::string jsonDataString;
@@ -265,43 +271,54 @@ void glutDisplay (void)
     bool jsonKey2PressedValue = false;
 
     static int counter = 0;
+    static unsigned int xScaleFactor = 2;
+    static unsigned int yScaleFactor = 2;
 
-    //get first tracked user, skip the rest...
+    //get first tracking user, skip the rest...
     for (int i = 0; i < nUsers; ++i)
     {
         if (g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i]))
         {
-//             activeUser = aUsers[i];
-
             g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_RIGHT_HAND, jointRightHand);
             g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_LEFT_HAND, jointLeftHand);
-
-            if (counter % 30 == 0)
-            {
-                debug() << "[i] selected user id: " << aUsers[i] << std::endl;
-                lastRightHandPosition.X = jointRightHand.position.X;
-                lastRightHandPosition.Y = jointRightHand.position.Y;
-
-            printf(" * jointRightHand.position (X: %f, Y: %f, Z: %f)\n", jointRightHand.position.X, jointRightHand.position.Y, jointRightHand.position.Z);
-            printf(" * jointRightHand.fConfidence (%f))\n", jointRightHand.fConfidence);
-                printf("\n\n\n");
-            }
-
+            g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_TORSO, jointTorso);
+//             g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_LEFT_HIP, jointLeftHip);
+//             g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_LEFT_HIP, jointRightHip);
 
             int dx = jointRightHand.position.X - lastRightHandPosition.X;
             int dy = jointRightHand.position.Y - lastRightHandPosition.Y;
 
+            //adjust direction
+            dy = dy * -1;
+
+            //scale
+            dx = dx * xScaleFactor;
+            dy = dy * yScaleFactor;
+
+            lastRightHandPosition.X = jointRightHand.position.X;
+            lastRightHandPosition.Y = jointRightHand.position.Y;
+
+
+            //skip first data set...
+            if (lastTrackingUser != aUsers[i])
+            {
+                lastTrackingUser = aUsers[i];
+                break;
+            }
+
+
+//             if (jointLeftHand.position.Y < ((jointLeftHip.position.Y + jointRightHip.position.Y) / 2))
+            if (jointLeftHand.position.Y < jointTorso.position.Y)
+            {
+                jsonKey1PressedValue = true;
+            }
+
             g_myJSONGenerator.generateJSONData(jsonDataString, dx, dy, jsonKey1PressedValue, jsonKey2PressedValue);
-
-            debug() << jsonDataString << std::endl;
-
             g_myUnixDomainSocketClient.sendData(jsonDataString.c_str(), jsonDataString.length());
-
 
             break;
         }
 
-        counter++;
 
     }
 

@@ -44,7 +44,6 @@ UinputCommander::~UinputCommander()
     releaseLeft();
     releaseRight();
 
-    std::cout << "[i] move mouse cursor to center position... " << std::endl;
     moveToCenterPosition();
 
     closeDevice();

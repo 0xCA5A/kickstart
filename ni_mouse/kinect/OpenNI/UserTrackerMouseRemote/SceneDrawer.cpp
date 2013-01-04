@@ -129,7 +129,7 @@ void glPrintString(void *font, char *str)
     }
 }
 #endif
-void DrawLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
+inline void DrawLimb(XnUserID player, XnSkeletonJoint eJoint1, XnSkeletonJoint eJoint2)
 {
     if (!g_UserGenerator.GetSkeletonCap().IsTracking(player))
     {
@@ -542,16 +542,18 @@ void DrawDepthMap(const xn::DepthMetaData& dmd, const xn::SceneMetaData& smd)
 
 
             //check if user is in cube or not
-            InOutChecker(aUsers[i]);
+//             InOutChecker(aUsers[i]);
 
 
+/*
+            //send data once per frame... only player 0 and only if tracked!
             if (i == 0)
             {
 
                 
 
                 
-            }
+            }*/
 
             
 

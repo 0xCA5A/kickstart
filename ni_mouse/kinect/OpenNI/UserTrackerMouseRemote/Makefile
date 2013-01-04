@@ -12,7 +12,7 @@ ifeq "$(GLUT_SUPPORTED)" "1"
 	ifeq ("$(OSTYPE)","Darwin")
 		LDFLAGS += -framework OpenGL -framework GLUT
 	else
-		USED_LIBS += glut
+		USED_LIBS += glut jsoncpp
 	endif
 else
 	ifeq "$(GLES_SUPPORTED)" "1"

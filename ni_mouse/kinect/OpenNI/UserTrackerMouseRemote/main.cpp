@@ -28,6 +28,12 @@
 #include "SceneDrawer.h"
 #include <XnPropNames.h>
 
+#include "UnixDomainSocketClient.h"
+#include "JSONGenerator.h"
+#include "AbstractSocketClient.h"
+#include "UnixDomainSocketClient.h"
+#include "Debug.h"
+
 //---------------------------------------------------------------------------
 // Globals
 //---------------------------------------------------------------------------
@@ -44,6 +50,10 @@ XnBool g_bDrawPixels = TRUE;
 XnBool g_bDrawSkeleton = TRUE;
 XnBool g_bPrintID = TRUE;
 XnBool g_bPrintState = TRUE;
+
+JSONGenerator g_myJSONGenerator;
+
+
 
 #ifndef USE_GLES
 #if (XN_PLATFORM == XN_PLATFORM_MACOSX)
@@ -229,6 +239,61 @@ void glutDisplay (void)
     g_DepthGenerator.GetMetaData(depthMD);
     g_UserGenerator.GetUserPixels(0, sceneMD);
     DrawDepthMap(depthMD, sceneMD);
+
+
+    XnUserID aUsers[3];
+    XnUInt16 nUsers = 3;
+    g_UserGenerator.GetUsers(aUsers, nUsers);
+    XnSkeletonJointPosition jointRightHand, jointLeftHand;
+//     XnUserID activeUser;
+
+    static XnVector3D lastRightHandPosition;
+    std::string jsonDataString;
+
+    bool jsonKey1PressedValue = false;
+    bool jsonKey2PressedValue = false;
+
+    static int counter = 0;
+
+    //get first tracked user, skip the rest...
+    for (int i = 0; i < nUsers; ++i)
+    {
+        if (g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i]))
+        {
+//             activeUser = aUsers[i];
+
+            g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_RIGHT_HAND, jointRightHand);
+            g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(aUsers[i], XN_SKEL_LEFT_HAND, jointLeftHand);
+
+            if (counter % 30 == 0)
+            {
+                debug() << "[i] selected user id: " << aUsers[i] << std::endl;
+                lastRightHandPosition.X = jointRightHand.position.X;
+                lastRightHandPosition.Y = jointRightHand.position.Y;
+
+            printf(" * jointRightHand.position (X: %f, Y: %f, Z: %f)\n", jointRightHand.position.X, jointRightHand.position.Y, jointRightHand.position.Z);
+            printf(" * jointRightHand.fConfidence (%f))\n", jointRightHand.fConfidence);
+                printf("\n\n\n");
+            }
+
+
+            int dx = jointRightHand.position.X - lastRightHandPosition.X;
+            int dy = jointRightHand.position.Y - lastRightHandPosition.Y;
+
+            g_myJSONGenerator.generateJSONData(jsonDataString, dx, dy, jsonKey1PressedValue, jsonKey2PressedValue);
+
+            debug() << jsonDataString << std::endl;
+
+
+            
+            break;
+        }
+
+        counter++;
+
+    }
+
+
 
 #ifndef USE_GLES
     glutSwapBuffers();

@@ -1,4 +1,4 @@
-CC = g++
+CC = clang++
 
 LDFLAGS = -ljsoncpp
 # DEFINES += -DDEBUG

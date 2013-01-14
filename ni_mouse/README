@@ -2,8 +2,9 @@
 HOW TO
 * check uinput kernel module (/dev/uinput | /dev/input/uinput)
 * chown <user> /dev/uinput 
-* start mouseMover
-* start a client application (kinect | simple_client | msp430) to send JSON position data
+* start MouseMover application to receive json data
+ * https://github.com/0xCA5A/kickstart/blob/master/ni_mouse/MouseMover/JSONAnalyzer.cpp
+* start a client application (simple_client | kinect | msp430) to send JSON position data and move mouse pointer and send click events
 
 
 

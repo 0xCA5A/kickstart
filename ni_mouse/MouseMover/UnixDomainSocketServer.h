@@ -3,10 +3,8 @@
 
 
 #include "AbstractSocketServer.h"
-
-
-
 #include <iostream>
+
 
 class UnixDomainSocketServer : public AbstractSocketServer
 {
@@ -18,10 +16,15 @@ class UnixDomainSocketServer : public AbstractSocketServer
         virtual int closeSocket(void);
         virtual int receiveData(char* dataBuffer, int dataBufferSize);
 
-    protected:
-
     private:
+        //default constructor
         UnixDomainSocketServer();
+
+        //copy constructor
+        UnixDomainSocketServer(const UnixDomainSocketServer& other);
+
+        //assignment operator
+        UnixDomainSocketServer&  operator = (const UnixDomainSocketServer& other);
 
     private:
         int m_fileDescriptor;

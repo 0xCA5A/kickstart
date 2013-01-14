@@ -52,24 +52,32 @@ class UinputCommander
 
 
 
-protected:
-private:
+    protected:
 
-    void openDevice(const std::string& uinputUNIXDeviceName);
-    void configureDevice(const std::string& uinputName);
-    void closeDevice(void);
+    private:
+        //default constructor
+        UinputCommander();
+
+        //copy constructor
+        UinputCommander(const UinputCommander& other);
+
+        //assignment operator
+        UinputCommander&  operator = (const UinputCommander& other);
+
+        void openDevice(const std::string& uinputUNIXDeviceName);
+        void configureDevice(const std::string& uinputName);
+        void closeDevice(void);
+
+        inline int changeButtonState(__u16 buttonCode, __s32 buttonValue);
+
+        inline int updatePositionRelative(int dx, int dy);
+    //        inline int updatePositionAbsolute(int x, int y);
 
 
-    inline int changeButtonState(__u16 buttonCode, __s32 buttonValue);
-
-    inline int updatePositionRelative(int dx, int dy);
-//        inline int updatePositionAbsolute(int x, int y);
-
-
-    int m_openedUinputDeviceFileDescriptor;
-    struct uinput_user_dev m_uinputUserDevice;
-    const unsigned int m_maxScreenResolutionX;
-    const unsigned int m_maxScreenResolutionY;
+        int m_openedUinputDeviceFileDescriptor;
+        struct uinput_user_dev m_uinputUserDevice;
+        const unsigned int m_maxScreenResolutionX;
+        const unsigned int m_maxScreenResolutionY;
 
 };
 

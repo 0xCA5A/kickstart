@@ -11,8 +11,13 @@ class JSONAnalyzer
 
         int parseJSONData(const std::string& jsonDataString, int& jsonDXPosValue, int& jsonDYPosValue, bool& jsonKey1pressedValue, bool& jsonKey2pressedValue);
 
-    public:
     private:
+        //copy constructor
+        JSONAnalyzer(const JSONAnalyzer&);
+
+        //assignment operator
+        JSONAnalyzer& operator=(const JSONAnalyzer&);
+
 };
 
 #endif

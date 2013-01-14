@@ -6,13 +6,22 @@
 class MouseMover
 {
     public:
-        MouseMover(void);
         ~MouseMover(void);
 
         void rock(void);
 
     public:
+
     private:
+        //default constructor
+        MouseMover();
+
+        //copy constructor
+        MouseMover(const MouseMover& other);
+
+        //assignment operator
+        MouseMover&  operator = (const MouseMover& other);
+
 };
 
 #endif

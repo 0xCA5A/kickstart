@@ -69,6 +69,8 @@ for i in range(1, NR_OF_MOVEMENTS):
         #raw_input('[i] enter to continue... ')
 
         time.sleep(0.2)
+        if (i % 35 == 0):
+            time.sleep(1)
 
 
     except:

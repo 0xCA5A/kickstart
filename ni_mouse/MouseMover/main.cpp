@@ -1,47 +1,29 @@
-
 #include "main.h"
 #include "Debug.h"
 #include "UinputCommander.h"
 #include "JSONAnalyzer.h"
-// #include "AbstractSocketServer.h"
+#include "AbstractSocketServer.h"
 #include "UnixDomainSocketServer.h"
 #include "HelperStuff.h"
-#include "MouseMover.h"
 
 #include <signal.h>
 #include <stdlib.h>
 
 
 
-
-
-//FIXME: move this variable away from global space...
-// i do not understand why the destructor is called automatically if the objects are
-// defined here...
-std::string uinputUNIXDeviceName(UINPUT_UNIX_DEVICE_NAME);
-std::string uinputName(UINPUT_NAME);
-UinputCommander myUinputCommander(uinputUNIXDeviceName, uinputName, MAX_SCREEN_X_RESOLUTION, MAX_SCREEN_Y_RESOLUTION);
-
-UnixDomainSocketServer myUnixDomainSocketServer(UNIX_DOMAIN_SOCKET_PATH);
-// MouseMover myMouseMover();
-
-
-
+// global stuff
+bool runFlag = true;
 
 
 
 static void signalHandler(int signalNumber)
 {
     printFunctonNameMacro();
+
     std::cout << "\n[i] caught signal number: " << signalNumber << std::endl;
-
-//     not necessary if uinputcommander is defined global...
-//     uinputCommander.~UinputCommander();
-
-//     myMouseMover.~MouseMover();
-
-    exit(EXIT_SUCCESS);
+    runFlag = false;
 }
+
 
 
 void registerSignals()
@@ -77,17 +59,18 @@ int main()
 {
     printFunctonNameMacro();
 
-    bool runFlag = true;
+    std::string uinputUNIXDeviceName(UINPUT_UNIX_DEVICE_NAME);
+    std::string uinputName(UINPUT_NAME);
+    UinputCommander myUinputCommander(uinputUNIXDeviceName, uinputName, MAX_SCREEN_X_RESOLUTION, MAX_SCREEN_Y_RESOLUTION);
 
-//     std::string uinputDeviceName(UINPUT_DEVICE_NAME);
-//     UinputCommander uinputCommander(uinputDeviceName);
-
-    //FIXME: can not call my own constructor...
+    unsigned int selectTimeoutValueInSeconds = 1;
+    UnixDomainSocketServer myUnixDomainSocketServer(selectTimeoutValueInSeconds, UNIX_DOMAIN_SOCKET_PATH);
     AbstractSocketServer* p_mySocketServer = &myUnixDomainSocketServer;
 
-    char dataBuffer[SOCKET_DATA_BUFFER_MAX_LENGTH];
+    JSONAnalyzer myJSONAnalyzer;
 
-//     JSONAnalyzer myJSONAnalyzer;
+
+    char socketDataBuffer[SOCKET_DATA_BUFFER_MAX_LENGTH];
     int dxPosValue;
     int dyPosValue;
     bool key1pressedValue;
@@ -95,26 +78,40 @@ int main()
     bool lastClickLeftState = false;
     bool lastClickRightState = false;
 
-    JSONAnalyzer myJSONAnalyzer;
-
 
     registerSignals();
-    p_mySocketServer->openSocket();
 
+    p_mySocketServer->openSocketNonBlocking();
+
+
+    std::cout << "[i] wait for client connection, enter receive loop..." << std::endl;
     int returnValue = 0;
-
-
-    std::cout << "[i] wait for client connection..." << std::endl;
     while(runFlag)
     {
 
-        p_mySocketServer->receiveData(dataBuffer, sizeof(dataBuffer));
-        std::string jsonDataString(dataBuffer);
+        //get date from socket
+        returnValue = p_mySocketServer->receiveDataNonBlocking(socketDataBuffer, sizeof(socketDataBuffer));
+
+        //something went wrong... exit gracefully...
+        if (returnValue < 0)
+        {
+            runFlag = false;
+            continue;
+        }
+
+        //select timeout
+        if (returnValue == 0)
+        {
+            continue;
+        }
+
+        std::string jsonDataString(socketDataBuffer);
         returnValue = myJSONAnalyzer.parseJSONData(jsonDataString, dxPosValue, dyPosValue, key1pressedValue, key2pressedValue);
         if (returnValue == EXIT_FAILURE)
         {
             continue;
         }
+
 
         myUinputCommander.incrementXYPosition(dxPosValue, dyPosValue);
 
@@ -153,9 +150,7 @@ int main()
     }
 
 
-
     return 0;
-
 
 }
 

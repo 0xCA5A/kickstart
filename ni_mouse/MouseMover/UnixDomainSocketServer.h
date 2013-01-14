@@ -3,18 +3,20 @@
 
 
 #include "AbstractSocketServer.h"
+       #include <sys/select.h>
+
 #include <iostream>
 
 
 class UnixDomainSocketServer : public AbstractSocketServer
 {
     public:
-        UnixDomainSocketServer(const std::string& socketPath);
+        UnixDomainSocketServer(const int unsigned selectTimeoutValueInSeconds, const std::string& socketPath);
         ~UnixDomainSocketServer(void);
 
-        virtual int openSocket(void);
+        virtual int openSocketNonBlocking(void);
         virtual int closeSocket(void);
-        virtual int receiveData(char* dataBuffer, int dataBufferSize);
+        virtual int receiveDataNonBlocking(char* dataBuffer, int dataBufferSize);
 
     private:
         //default constructor
@@ -28,6 +30,11 @@ class UnixDomainSocketServer : public AbstractSocketServer
 
     private:
         int m_fileDescriptor;
+        unsigned int m_selectTimeoutValueInSeconds;
+        struct timeval m_timeout;
+        fd_set m_master_set;
+        fd_set m_working_set;
+
         std::string m_socketPath;
 };
 

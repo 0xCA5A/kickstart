@@ -30,4 +30,4 @@ $(APPLICATION_NAME): main.cpp $(OBJECTS) $(HEADERS)
 clean:
 	rm -fv *.o
 	rm -fv $(APPLICATION_NAME)
-	rm *~
+	rm -fv *~

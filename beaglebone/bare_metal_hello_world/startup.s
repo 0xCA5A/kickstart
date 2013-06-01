@@ -1,16 +1,16 @@
 .section INTERRUPT_VECTOR, "x"
-.global _Reset
-_Reset:
-  B Reset_Handler /* Reset */
-  B . /* Undefined */
-  B . /* SWI */
-  B . /* Prefetch Abort */
-  B . /* Data Abort */
+.global _reset
+_reset:
+  B reset_handler /* reset */
+  B . /* undefined instruction */
+  B . /* swi */
+  B . /* prefetch abort */
+  B . /* data abort */
   B . /* reserved */
-  B . /* IRQ */
-  B . /* FIQ */
+  B . /* irq */
+  B . /* fiq */
 
-Reset_Handler:
-  LDR sp, =stack_top
-  BL c_entry
-  B .
+reset_handler:
+  LDR sp, =stack_top /* set stack pointer */
+  BL c_entry /* c code entry point */
+  B . /* loop forever after return from c code */

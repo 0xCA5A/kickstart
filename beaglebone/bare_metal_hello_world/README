@@ -1,13 +1,16 @@
-= bare metal c project for beaglebone, ti sitara am335x =
+bare metal c project for beaglebone, ti sitara am335x
+=====================================================
 
-== doc ==
+doc
+---
 check here for further information:
 * http://balau82.wordpress.com/2010/02/14/simplest-bare-metal-program-for-arm/
 * http://developers.stf12.net/cpp-demo/gcc-linker-script-and-stm32-a-tutorial
 * http://stackoverflow.com/questions/6139952/what-is-the-booting-process-for-arm
 * http://www.cs.utsa.edu/~whaley/teach/FHPO_F11/ARM/CortAProgGuide.pdf
 
-== reset vector setup ==
-
+reset vector setup
+------------------
+~ do not understand yet...
 
 source: http://www.cs.utsa.edu/~whaley/teach/FHPO_F11/ARM/CortAProgGuide.pdf, 10.4 Exception mode summary, page 161

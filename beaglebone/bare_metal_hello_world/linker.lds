@@ -1,4 +1,4 @@
-ENTRY(_reset) /* entry point of the program, first instruction executed */
+ENTRY(_asm_entry) /* entry point of the program, first instruction executed */
 SECTIONS
 {
  . = 0x402F0400;

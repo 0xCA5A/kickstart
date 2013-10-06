@@ -5,7 +5,7 @@
 
 
 
-void MixerAlgorithmSimpleAddWithNormalization::algorithm()
+void MixerAlgorithmSimpleAddWithNormalization::mixSamples()
 {
     std::cout << typeid(*this).name() << std::endl;
 

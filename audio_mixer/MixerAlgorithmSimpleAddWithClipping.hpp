@@ -12,7 +12,7 @@
 class MixerAlgorithmSimpleAddWithClipping : public MixerAlgorithm
 {
 public:
-    virtual void algorithm();
+    virtual void mixSamples();
 private:
 };
 

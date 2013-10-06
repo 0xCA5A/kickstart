@@ -5,7 +5,7 @@
 #include "MixerAlgorithmSimpleAddWithNormalization.hpp"
 
 
-int main()
+int main(int argc, char* argv[])
 {
 
     std::list<std::string> mixerInputRIFFWAVEFileList;
@@ -14,6 +14,8 @@ int main()
     mixerInputRIFFWAVEFileList.push_back("samples3.wav");
 
     MixerApplication mixerApplication;
+    mixerApplication.tryToOpenRIFFWAVEFiles(--argc, ++argv);
+
     MixerAlgorithmSimpleAddWithClipping mixerAlgorithmSimpleAddWithClipping;
     MixerAlgorithmSimpleAddWithNormalization mixerAlgorithmSimpleAddWithNormalization;
 

@@ -4,7 +4,7 @@
 class MixerAlgorithm
 {
 public:
-    virtual void algorithm() = 0;
+    virtual void mixSamples() = 0;
 };
 
 #endif

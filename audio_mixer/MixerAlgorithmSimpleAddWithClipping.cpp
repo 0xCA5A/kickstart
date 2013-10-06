@@ -5,7 +5,7 @@
 
 
 
-void MixerAlgorithmSimpleAddWithClipping::algorithm()
+void MixerAlgorithmSimpleAddWithClipping::mixSamples()
 {
     std::cout << typeid(*this).name() << std::endl;
 

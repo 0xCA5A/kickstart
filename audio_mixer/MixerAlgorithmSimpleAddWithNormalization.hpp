@@ -12,8 +12,7 @@
 class MixerAlgorithmSimpleAddWithNormalization : public MixerAlgorithm
 {
 public:
-    virtual void algorithm();
-private:
+    virtual void mixSamples();
 };
 
 #endif

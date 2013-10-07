@@ -12,7 +12,7 @@
  * @brief wave file shifter class
  * allows to prefix / shift input wave file (RIFF) data with zero samples.
  *
- * the code is tested with 16bit samples, 16khz samplingrate
+ * the code is tested with 16bit samples, 16khz and 32khz samplingrate
  * 
  * @param argc number of arguments from command line
  * @param argv command line argument vector

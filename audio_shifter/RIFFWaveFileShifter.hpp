@@ -8,10 +8,10 @@ class RIFFWaveFileShifter
 public:
     RIFFWaveFileShifter(int argc, char** argv);
     ~RIFFWaveFileShifter();
-    void createOutputFile(const char* outputFileName);
-    void showHowToAndExit(const std::string& applicationName);
-    void processAudioFile(void);
-    
+    void createOutputFile(void);
+    void showHowToAndExit(const std::string& applicationName) const;
+    void shiftAudioFile(void);
+
 private:
     RIFFWaveFileShifter(const RIFFWaveFileShifter&);
     RIFFWaveFileShifter& operator=(const RIFFWaveFileShifter&);
@@ -22,7 +22,7 @@ private:
     const std::string m_applicationName;
     std::string m_inputFilePath;
     std::string m_outputFilePath;
-    int m_audioZeroDelayInMilliseconds;
+    int m_audioZeroDelayInMicroSeconds;
     SNDFILE* m_inputSoundFileHandler;
     SNDFILE* m_outputSoundFileHandler;
     SF_INFO m_inputSfInfo;

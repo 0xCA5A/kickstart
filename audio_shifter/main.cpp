@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 {
 
     RIFFWaveFileShifter riffWaveFileShifter(argc, argv);
-    riffWaveFileShifter.processAudioFile();
+    riffWaveFileShifter.shiftAudioFile();
 
     return 0;
 }

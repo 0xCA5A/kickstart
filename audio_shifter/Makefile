@@ -1,7 +1,7 @@
 
 
 OBJ_FILES := RIFFWaveFileShifter.o
-CPPFLAGS += -Wall
+CPPFLAGS += -Wall -Werror
 APP_BINARY := riffwavefileshifter
 
 

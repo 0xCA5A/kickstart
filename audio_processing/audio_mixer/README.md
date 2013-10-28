@@ -1,5 +1,17 @@
-
 this simple application allows you to test differen audio mixing algorithms.
+
+limitations
+===========
+* only 16khz samplingrate is supported
+
+how to
+======
+get some 16khz RIFF wave files you want to mix together using the algorithms or generate them using the script here:
+https://github.com/ruf-telematik-ag/audiocore-dsp/blob/master/test_scripts/sine_wave_generator.py
+
+then run the application mixerapplication with all the wave files as arguments
+./mixerapplication samples/*
+
 
 general information about audio mixing
 ======================================
@@ -11,8 +23,8 @@ general information about signal processing
 * http://www.edn.com/design/characterization/4380952/Create-noise-and-signals-with-software#id3507571-0-a
 
 
-important information for mixing-dummy´s like me
-================================================
+important information for audio mixing
+======================================
 If you're doing lots of audio processing, you might want to represent your audio levels as floating-point values, and only go back to the 16-bit space at the end of the process. High-end digital audio systems often work this way.
 source: http://stackoverflow.com/questions/376036/algorithm-to-mix-sound
 
@@ -20,13 +32,4 @@ source: http://stackoverflow.com/questions/376036/algorithm-to-mix-sound
 source: http://stackoverflow.com/questions/376036/algorithm-to-mix-sound
 
 
-
-how to
-======
-
-get some RIFF wave files you want to mix together using the algorithms or generate them using the script here:
-https://github.com/ruf-telematik-ag/audiocore-dsp/blob/master/test_scripts/sine_wave_generator.py
-
-then run the application mixerapplication with all the wave files as arguments
-./mixerapplication samples/*
 

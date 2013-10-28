@@ -7,14 +7,7 @@
 
 int main(int argc, char* argv[])
 {
-
-    std::list<std::string> mixerInputRIFFWAVEFileList;
-    mixerInputRIFFWAVEFileList.push_back("samples1.wav");
-    mixerInputRIFFWAVEFileList.push_back("samples2.wav");
-    mixerInputRIFFWAVEFileList.push_back("samples3.wav");
-
-    MixerApplication mixerApplication;
-    mixerApplication.tryToOpenRIFFWAVEFiles(--argc, ++argv);
+    MixerApplication mixerApplication(--argc, ++argv);
 
     MixerAlgorithmSimpleAddWithClipping mixerAlgorithmSimpleAddWithClipping;
     MixerAlgorithmSimpleAddWithNormalization mixerAlgorithmSimpleAddWithNormalization;
@@ -22,11 +15,11 @@ int main(int argc, char* argv[])
 
     mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithClipping);
     const std::string mixerAlgorithmSimpleAddWithClippingMixFileName("mixerAlgorithmSimpleAddWithClippingMixResult.wav");
-    mixerApplication.mixRIFFWAVEFiles(mixerInputRIFFWAVEFileList, mixerAlgorithmSimpleAddWithClippingMixFileName);
+    mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmSimpleAddWithClippingMixFileName);
 
     mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithNormalization);
     const std::string mixerAlgorithmSimpleAddWithNormalizationMixFileName("mixerAlgorithmSimpleAddWithNormalizationMixFileName.wav");
-    mixerApplication.mixRIFFWAVEFiles(mixerInputRIFFWAVEFileList, mixerAlgorithmSimpleAddWithNormalizationMixFileName);
+    mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmSimpleAddWithNormalizationMixFileName);
 
     return 0;
 }

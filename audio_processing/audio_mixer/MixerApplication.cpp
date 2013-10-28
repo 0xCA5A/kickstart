@@ -8,38 +8,53 @@
 
 MixerApplication::MixerApplication(unsigned int numberOfInputFiles, char* inputFileNameArray[])
     : m_p_mixerAlgorithm(0)
-    , m_soundFileNameArray(inputFileNameArray)
-
 {
-    m_soundFileInfoArray = new SF_INFO[123];
+    m_p_soundFileHandlerArray = new SNDFILE*[numberOfInputFiles];
+    m_p_soundFileInfoArray = new SF_INFO[numberOfInputFiles];
+
+    for (unsigned int i = 0; i < numberOfInputFiles; i++)
+    {
+        m_mixerInputRIFFWAVEFileList.push_back(inputFileNameArray[i]);
+    }
+
+    tryToOpenRIFFWAVEFiles();
 }
 
 
-MixerApplication::~MixerApplication(void )
+MixerApplication::~MixerApplication(void)
 {
-}
-
-
-bool MixerApplication::tryToOpenRIFFWAVEFiles(const unsigned int nrOfFiles, char** fileList)
-{
-
-    for (unsigned int fileIndex = 0; fileIndex < nrOfFiles; ++fileIndex)
+    //close files
+    for (unsigned int index = 0; index < m_mixerInputRIFFWAVEFileList.size(); ++index)
     {
 
-        sf_open();
-//         if (!MixerApplication::checkIfFileIsReadable(argv[fileIndex]))
-//         {
-//             std::cout << __FUNCTION__ << " [!] file " << argv[fileIndex] << "is not readable" << std::endl;
-//             return -1;
-//         }
-// 
-//         if (!MixerApplication::checkIfFileIsRIFFWAVEFile(argv[fileIndex]))
-//         {
-//             std::cout << __FUNCTION__ << " [!] file " << argv[fileIndex] << "is not a valid RIFF wave file" << std::endl;
-//             return -1;
-//         }
+        sf_close(m_p_soundFileHandlerArray[index]);
+    }
+
+    //delete structures
+    delete [] m_p_soundFileHandlerArray;
+    delete [] m_p_soundFileInfoArray;
+}
+
+
+bool MixerApplication::tryToOpenRIFFWAVEFiles(void)
+{
+    std::list<std::string>::const_iterator listIterator = m_mixerInputRIFFWAVEFileList.begin();
+    for (unsigned int fileIndex = 0; fileIndex < m_mixerInputRIFFWAVEFileList.size(); ++fileIndex)
+    {
+
+        m_p_soundFileHandlerArray[fileIndex] = sf_open((*listIterator).c_str(), SFM_READ, &m_p_soundFileInfoArray[fileIndex]);
+
+        if (m_p_soundFileHandlerArray[fileIndex] == NULL)
+        {
+            std::cout << "[!] unable to open the wave file " << (*listIterator).c_str() << ": " << sf_strerror(m_p_soundFileHandlerArray[fileIndex]) << std::endl;
+            return false;
+        }
+
+        ++listIterator;
 
     }
+
+    return true;
 }
 
 // bool MixerApplication::openRIFFWAVEFileForReading(const char* riffWaveMixFileName)
@@ -61,7 +76,7 @@ void MixerApplication::setStrategy(MixerAlgorithm* mixerAlgorithm)
 }
 
 
-void MixerApplication::mixRIFFWAVEFiles(const std::list<std::string>& riffWaveFileNameList, const std::string& riffWaveMixFileName)
+void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
 {
     //check if mixer strategy is set
     if (m_p_mixerAlgorithm == 0)

@@ -13,20 +13,24 @@ public:
     MixerApplication(unsigned int numberOfInputFiles, char* inputFileNameArray[]);
     ~MixerApplication(void);
     void setStrategy(MixerAlgorithm* mixerAlgorithm);
-    void mixRIFFWAVEFiles(const std::list<std::string>& riffWaveFileNameList, const std::string& riffWaveMixFileName);
+    void mixRIFFWAVEFiles(const std::string& riffWaveMixFileName);
 //     static bool checkIfFileIsReadable(const char* riffWaveMixFileName);
 //     static bool checkIfFileIsRIFFWAVEFile(const char* riffWaveMixFileName);
-    bool tryToOpenRIFFWAVEFiles(const unsigned int nrOfFiles, char** fileList);
+
 
 private:
     MixerApplication(const MixerApplication&);
     MixerApplication& operator=(const MixerApplication&);
-
+    bool tryToOpenRIFFWAVEFiles(void);
+    
 private:
     MixerAlgorithm* m_p_mixerAlgorithm;
-    SF_INFO m_soundFileInfoArray[];
-    SNDFILE* m_soundFileHandlerArray[];
+    SF_INFO* m_p_soundFileInfoArray;
+    SNDFILE** m_p_soundFileHandlerArray;
     char* m_soundFileNameArray[];
+
+    std::list<std::string> m_mixerInputRIFFWAVEFileList;
+
 };
 
 #endif 

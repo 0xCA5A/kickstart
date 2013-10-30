@@ -1,12 +1,8 @@
 #include <iostream>
-#include <typeinfo>
-#include <fstream>
 #include <sndfile.h>
 #include <cstdlib>
 #include <strings.h>
-
 #include <limits>
-
 
 #include "MixerApplication.hpp"
 
@@ -25,10 +21,12 @@ MixerApplication::MixerApplication(unsigned int numberOfInputFiles, char* inputF
 
     m_p_soundFileHandlerArray = new SNDFILE*[m_nrOfInputFiles];
     m_p_soundFileInfoArray = new SF_INFO[m_nrOfInputFiles];
+    m_p_gainFactorArray = new float[m_nrOfInputFiles];
 
     for (unsigned int i = 0; i < m_nrOfInputFiles; i++)
     {
         m_mixerInputRIFFWAVEFileNameList.push_back(inputFileNameArray[i]);
+        m_p_gainFactorArray[i] = 1.0;
     }
 
     tryToOpenRIFFWAVEFiles();
@@ -54,10 +52,11 @@ MixerApplication::~MixerApplication(void)
     delete [] m_p_soundFileInfoArray;
 }
 
-void MixerApplication::checkWaveFileConfiguration(void)
+
+void MixerApplication::checkWaveFileConfiguration(void) const
 {
     //check if all files have the same configuration...
-    //no conversion at the moment...
+    //no sampling rate conversion at the moment...
 
     //check if data structures are initialized
     if (m_p_soundFileInfoArray == NULL)
@@ -80,7 +79,7 @@ void MixerApplication::checkWaveFileConfiguration(void)
         }
         if (m_p_soundFileInfoArray[0].samplerate != m_p_soundFileInfoArray[fileIndex].samplerate)
         {
-            std::cout << "[!] format differ at file index 0 and " << fileIndex << std::endl;
+            std::cout << "[!] samplerate differ at file index 0 and " << fileIndex << std::endl;
             exit(EXIT_FAILURE);
         }
     }
@@ -105,7 +104,6 @@ void MixerApplication::tryToOpenRIFFWAVEFiles(void)
         }
 
         ++listIterator;
-
     }
 }
 
@@ -121,15 +119,15 @@ void MixerApplication::setStrategy(MixerAlgorithm* const mixerAlgorithm)
 }
 
 
-void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
+void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName) const
 {
     //check if mixer strategy is set
     if (m_p_mixerAlgorithm == 0)
     {
-        std::cout << __FUNCTION__ << " [!] mixer strategy not set!" << std::endl;
+        std::cout << " [!] mixer strategy not set!" << std::endl;
         return;
     }
-    std::cout << __FUNCTION__ << " [i] mixer strategy ok, use " << m_p_mixerAlgorithm->getAlgorithmName() << std::endl;
+    std::cout <<"[i] mixer strategy " << m_p_mixerAlgorithm->getAlgorithmName() << " selected" << std::endl;
 
     //init sf info structure
     SF_INFO mixSfInfo;
@@ -139,7 +137,10 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
     mixSfInfo.samplerate = m_p_soundFileInfoArray[0].samplerate;
     mixSfInfo.frames = getMinimalNrOfFramesInFiles();
 
+    std::cout << "[i] minimal number of frames in input files: " << mixSfInfo.frames << std::endl;
+
     //open output file
+    std::cout << "[i] open mixer output file " << riffWaveMixFileName << std::endl;
     SNDFILE* mixFileHandler = sf_open(riffWaveMixFileName.c_str(), SFM_WRITE, &mixSfInfo);
     if (mixFileHandler == NULL)
     {
@@ -148,28 +149,29 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
     }
 
     //prepare dynamic buffers, allocate memory
+    std::cout << "[i] prepare internal 16bit buffers..." << std::endl;
     int16_t** const pp_inputSampleBufferArray = new int16_t*[m_nrOfInputFiles];
     for (uint32_t i = 0; i < m_nrOfInputFiles; ++i)
     {
         pp_inputSampleBufferArray[i] = new int16_t[m_p_soundFileInfoArray[0].channels];
     }
-
     int16_t* p_outputSampleBuffer = new int16_t[m_p_mixerAlgorithm->getNrOfSamplesPerChunk()];
 
+    std::cout << "[i] process frames..." << std::endl;
     for (uint32_t chunkIndex = 0; chunkIndex < (getMinimalNrOfFramesInFiles() / m_p_mixerAlgorithm->getNrOfSamplesPerChunk()); ++chunkIndex)
     {
-        //copy the data
+        //read the data from file to process data structure
         for (uint32_t i = 0; i < m_nrOfInputFiles; ++i)
         {
             sf_read_short(m_p_soundFileHandlerArray[i], pp_inputSampleBufferArray[i], m_p_mixerAlgorithm->getNrOfSamplesPerChunk());
         }
 
-        //mix the samples, chunk by chunk
+        //execute algorithm, mix the samples chunk by chunk
         m_p_mixerAlgorithm->mixSamples(pp_inputSampleBufferArray, m_nrOfInputFiles, m_p_mixerAlgorithm->getNrOfSamplesPerChunk(), p_outputSampleBuffer);
 
         sf_write_short(mixFileHandler, p_outputSampleBuffer, m_p_mixerAlgorithm->getNrOfSamplesPerChunk());
-        
     }
+    std::cout << "[i] process done..." << std::endl;
 
     //free data structures
     delete [] p_outputSampleBuffer;
@@ -184,8 +186,7 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
 }
 
 
-
-uint32_t MixerApplication::getMinimalNrOfFramesInFiles(void)
+uint32_t MixerApplication::getMinimalNrOfFramesInFiles(void) const
 {
     uint32_t minimalNrOfFrames = std::numeric_limits<uint32_t>::max();
     for (uint32_t i = 0; i < m_nrOfInputFiles; ++i)
@@ -198,4 +199,3 @@ uint32_t MixerApplication::getMinimalNrOfFramesInFiles(void)
 
     return minimalNrOfFrames;
 }
-

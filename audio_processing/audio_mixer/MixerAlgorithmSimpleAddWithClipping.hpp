@@ -11,9 +11,14 @@
  */
 class MixerAlgorithmSimpleAddWithClipping : public MixerAlgorithm
 {
+
 public:
-    virtual void mixSamples();
-private:
+    MixerAlgorithmSimpleAddWithClipping(std::string& algorithmName)
+    : MixerAlgorithm(algorithmName) {}
+
+    virtual void mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, const uint32_t nrOfSamplesPerChunk, int16_t* const outputSampleBuffer);
+    virtual uint32_t getNrOfSamplesPerChunk(void);
+
 };
 
 #endif

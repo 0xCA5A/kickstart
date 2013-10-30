@@ -16,11 +16,15 @@ function extract_and_convert_audio_wave_channels
 
     RIFF_WAVE_OUTPUT_FILE=${RIFF_WAVE_INPUT_FILE_NAME}_mono_left_${SAMPLE_RATE}_samplingrate.${RIFF_WAVE_INPUT_FILE_EXTENSION}
     echo " * extract and convert left channel to file ${RIFF_WAVE_OUTPUT_FILE}, sampling rate ${SAMPLE_RATE}..."
-    sox $1 -c 1 -r ${SAMPLE_RATE} ${RIFF_WAVE_OUTPUT_FILE} remix 1
+    sox $1 -G -c 1 -r ${SAMPLE_RATE} ${RIFF_WAVE_OUTPUT_FILE} remix 1
 
     RIFF_WAVE_OUTPUT_FILE=${RIFF_WAVE_INPUT_FILE_NAME}_mono_right_${SAMPLE_RATE}_samplingrate.${RIFF_WAVE_INPUT_FILE_EXTENSION}
     echo " * extract and convert right channel to file ${RIFF_WAVE_OUTPUT_FILE}, sampling rate ${SAMPLE_RATE}..."
-    sox $1 -c 1 -r ${SAMPLE_RATE} ${RIFF_WAVE_OUTPUT_FILE} remix 2
+    sox $1 -G -c 1 -r ${SAMPLE_RATE} ${RIFF_WAVE_OUTPUT_FILE} remix 2
+
+    RIFF_WAVE_OUTPUT_FILE=${RIFF_WAVE_INPUT_FILE_NAME}_mono_mix_${SAMPLE_RATE}_samplingrate.${RIFF_WAVE_INPUT_FILE_EXTENSION}
+    echo " * mix left and right channel to file ${RIFF_WAVE_OUTPUT_FILE}, sampling rate ${SAMPLE_RATE}..."
+    sox $1 -G -c 1 -r ${SAMPLE_RATE} ${RIFF_WAVE_OUTPUT_FILE}
 
     unset RIFF_WAVE_OUTPUT_FILE
     unset RIFF_WAVE_INPUT_FILE_EXTENSION

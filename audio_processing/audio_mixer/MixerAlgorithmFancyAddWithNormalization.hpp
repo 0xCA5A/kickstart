@@ -10,7 +10,7 @@
 
 
 /**
- * @brief implementation of simple fix point sample add algorithm
+ * @brief implementation of simple fix point sample add algorithm with hard clipping
  *
  */
 class MixerAlgorithmSimpleAddWithNormalization : public MixerAlgorithm

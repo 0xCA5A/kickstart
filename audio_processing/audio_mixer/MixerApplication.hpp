@@ -14,14 +14,16 @@ public:
     MixerApplication(unsigned int numberOfInputFiles, char* inputFileNameArray[]);
     ~MixerApplication(void);
     void setStrategy(MixerAlgorithm* const mixerAlgorithm);
-    void mixRIFFWAVEFiles(const std::string& riffWaveMixFileName) const;
+    void mixRIFFWAVEFiles(const std::string& riffWaveMixFileName);
 
 private:
     MixerApplication(const MixerApplication&);
     MixerApplication& operator=(const MixerApplication&);
     void tryToOpenRIFFWAVEFiles(void);
+    void tryToRewindRIFFWAVEFiles(void);
     void checkWaveFileConfiguration(void) const;
-    uint32_t getMinimalNrOfFramesInFiles(void) const;
+    inline uint32_t getMaximumNrOfFramesInFiles(void) const;
+    inline uint32_t getMinimumNrOfFramesInFiles(void) const;
 
 private:
     MixerAlgorithm* m_p_mixerAlgorithm;

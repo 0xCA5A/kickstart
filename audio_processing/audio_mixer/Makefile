@@ -1,6 +1,6 @@
 
 
-OBJ_FILES := MixerApplication.o MixerAlgorithmSimpleAddWithClipping.o MixerAlgorithmSimpleAddWithNormalization.o
+OBJ_FILES := MixerApplication.o MixerAlgorithmSimpleAddWithClipping.o MixerAlgorithmSimpleAddWithNormalization.o MixerAlgorithmSimpleAddWithSmoothNormalization.o
 CPPFLAGS += -Wall
 LDFLAGS += -l sndfile
 APP_BINARY := mixerapplication
@@ -12,3 +12,6 @@ all: $(OBJ_FILES)
 clean:
 	rm -f *.o
 	rm -f $(APP_BINARY)
+
+doc:
+	cd doc; doxygen Doxyfile; cd -

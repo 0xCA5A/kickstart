@@ -1,42 +1,49 @@
 #include <iostream>
 #include <typeinfo>
 
+#include <limits>
 #include "MixerAlgorithmSimpleAddWithClipping.hpp"
 
 
-void MixerAlgorithmSimpleAddWithClipping::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, const uint32_t nrOfSamplesPerChunk, int16_t* const outputSampleBuffer)
+/**
+ * @brief mix samples as simple as possible
+ * NOTE: mixer result is wrong with more than two data streams due to bad overflow / underflow detection!
+ *
+ * @param inputSampleBufferArray input data structure, pointer to 2d array holding 'no of streams' x 'chunk size' data samples
+ * @param nrOfStreams number of mixer input streams
+ * @param outputSampleBuffer buffer to store the result, 'chunk size' samples
+ * @return void
+ */
+void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithClipping::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
-    int64_t sampleSumBuffer[nrOfSamplesPerChunk];
 
-    for (uint32_t chunkIndex = 0; chunkIndex < nrOfSamplesPerChunk; ++chunkIndex)
+    int64_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+
+    for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
     {
         sampleSumBuffer[chunkIndex] = 0;
         for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex)
         {
+            //detect overflow
+            if ((inputSampleBufferArray[streamIndex][chunkIndex] > 0) && (sampleSumBuffer[chunkIndex] > std::numeric_limits<int16_t>::max() - inputSampleBufferArray[streamIndex][chunkIndex]))
+            {
+                sampleSumBuffer[chunkIndex] = std::numeric_limits<int16_t>::max();
+                continue;
+            }
+
+            //underflow
+            if ((inputSampleBufferArray[streamIndex][chunkIndex] < 0) && (sampleSumBuffer[chunkIndex] < std::numeric_limits<int16_t>::min() - inputSampleBufferArray[streamIndex][chunkIndex]))
+            {
+                sampleSumBuffer[chunkIndex] = std::numeric_limits<int16_t>::min();
+                continue;
+            }
+
+            //default case
             sampleSumBuffer[chunkIndex] += inputSampleBufferArray[streamIndex][chunkIndex];
         }
 
-        //normalize and store
-        outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] / nrOfStreams;
+        //store
+        outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex];
     }
-
-// short sample1 = ...;
-// short sample2 = ...;
-// float samplef1 = sample1 / 32768.0f;
-// float samplef2 = sample2 / 32768.0f;
-// float mixed = samplef1 + sample2f;
-// // reduce the volume a bit:
-// mixed *= 0.8;
-// // hard clipping
-// if (mixed > 1.0f) mixed = 1.0f;
-// if (mixed < -1.0f) mixed = -1.0f;
-// short outputSample = (short)(mixed * 32768.0f)
-
-
 }
 
-uint32_t MixerAlgorithmSimpleAddWithClipping::getNrOfSamplesPerChunk(void)
-{
-    //algorithm specific stuff, how to design this in the right way?
-    return 1;
-}

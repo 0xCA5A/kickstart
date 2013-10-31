@@ -1,5 +1,5 @@
-#ifndef MIXERALGORITHMSIMPLEADDWITHNORMALIZATION_HPP
-#define MIXERALGORITHMSIMPLEADDWITHNORMALIZATION_HPP
+#ifndef MIXERALGORITHMSIMPLEADDWITHSMOOTHNORMALIZATION_HPP
+#define MIXERALGORITHMSIMPLEADDWITHSMOOTHNORMALIZATION_HPP
 
 
 #include "MixerAlgorithm.hpp"
@@ -10,14 +10,14 @@
 
 
 /**
- * @brief implementation of simple fix point sample add algorithm
+ * @brief implementation of fix point sample add algorithm with smooth normalization
  *
  */
-class MixerAlgorithmSimpleAddWithNormalization : public MixerAlgorithm
+class MixerAlgorithmSimpleAddWithSmoothNormalization : public MixerAlgorithm
 {
 
 public:
-    MixerAlgorithmSimpleAddWithNormalization(std::string& algorithmName)
+    MixerAlgorithmSimpleAddWithSmoothNormalization(std::string& algorithmName)
     : MixerAlgorithm(algorithmName), m_mixerAlgorithmDataElement(__NR_OF_SAMPLES_PER_CHUNK) {}
     virtual void mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer);
     virtual MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return m_mixerAlgorithmDataElement;};

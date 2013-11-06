@@ -35,4 +35,4 @@ private:
     std::list<std::string> m_mixerInputRIFFWAVEFileNameList;
 };
 
-#endif 
+#endif

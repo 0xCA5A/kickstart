@@ -1,8 +1,10 @@
 #include <iostream>
 #include <typeinfo>
 #include <limits>
+#include <strings.h>
 
 #include "MixerAlgorithmSimpleAddWithSmoothNormalization.hpp"
+#include "../../../maglev/hwpacks/ESU-II/linux-3.2.0-psp04.06.00.08.sdk/arch/arm/nwfpe/ARM-gcc.h"
 
 
 // Solution 1: Quick and Dirty Maths
@@ -26,55 +28,123 @@ void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithSmoothNormalizat
     int64_t sampleProductBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
     int64_t coefficientSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 
+//     int32_t tempResult[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+//     bzero(tempResult, m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk() * (sizeof(int16_t)));
+    
     for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
     {
-        sampleSumBuffer[chunkIndex] = 0;
-        sampleProductBuffer[chunkIndex] = 1;
-        coefficientSumBuffer[chunkIndex] = 0;
+//         sampleSumBuffer[chunkIndex] = 0;
+//         sampleProductBuffer[chunkIndex] = 1;
+//         coefficientSumBuffer[chunkIndex] = 0;
+// 
+//         uint32_t minimalCount = 0;
+//         uint32_t maximalCount = 0;
+// 
+        int32_t tempMixSampleResult = 0;
+// 
+//         for (uint32_t streamIndex = 1; streamIndex < nrOfStreams; ++streamIndex)
+//         {
+// 
+//             //minimal samples
+//             if (tempMixSampleResult < 0 && inputSampleBufferArray[streamIndex][chunkIndex] < 0)
+//             {
+//                 tempMixSampleResult = tempMixSampleResult + inputSampleBufferArray[streamIndex][chunkIndex] - (tempMixSampleResult * inputSampleBufferArray[streamIndex][chunkIndex]) / std::numeric_limits<int16_t>::min();
+//                 continue;
+//             }
+// 
+//             //maximal samples
+//             if (tempMixSampleResult > 0 && inputSampleBufferArray[streamIndex][chunkIndex] > 0)
+//             {
+//                 tempMixSampleResult = tempMixSampleResult + inputSampleBufferArray[streamIndex][chunkIndex] - (tempMixSampleResult * inputSampleBufferArray[streamIndex][chunkIndex]) / std::numeric_limits<int16_t>::max();
+//                 continue;
+//             }
+// 
+//             //default samples
+//             tempMixSampleResult = tempMixSampleResult + inputSampleBufferArray[streamIndex][chunkIndex] - (tempMixSampleResult * inputSampleBufferArray[streamIndex][chunkIndex]);
+// 
+// //             sampleSumBuffer[chunkIndex] += inputSampleBufferArray[streamIndex][chunkIndex];
+// //             sampleProductBuffer[chunkIndex] *= inputSampleBufferArray[streamIndex][chunkIndex];
+// 
+// //             //sum up coefficients, used in special cases 'below zero', 'above zero'
+// //             for (uint32_t i = streamIndex + 1; i < nrOfStreams; i++)
+// //             {
+// //                 coefficientSumBuffer[chunkIndex] += inputSampleBufferArray[streamIndex][chunkIndex] * inputSampleBufferArray[i][chunkIndex];
+// //             }
+// // 
+// //             //check if below zero
+// //             if (inputSampleBufferArray[streamIndex][chunkIndex] < 0)
+// //             {
+// //                 minimalCount++;
+// //             }
+// // 
+// //             //check if above zero
+// //             if (inputSampleBufferArray[streamIndex][chunkIndex] > 0)
+// //             {
+// //                 maximalCount++;
+// //             }
+            
 
-        uint32_t minimalCount = 0;
-        uint32_t maximalCount = 0;
+        const int16_t a = inputSampleBufferArray[0][chunkIndex];
+        const int16_t b = inputSampleBufferArray[1][chunkIndex];
+        const int16_t c = inputSampleBufferArray[2][chunkIndex];
 
-
-        for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex)
+    int minusCounter = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        if (inputSampleBufferArray[i][chunkIndex] < 0)
         {
-            sampleSumBuffer[chunkIndex] += inputSampleBufferArray[streamIndex][chunkIndex];
-            sampleProductBuffer[chunkIndex] *= inputSampleBufferArray[streamIndex][chunkIndex];
-
-            //sum up coefficients, used in special cases 'below zero', 'above zero'
-            for (uint32_t i = streamIndex + 1; i < nrOfStreams; i++)
-            {
-                coefficientSumBuffer[chunkIndex] += inputSampleBufferArray[streamIndex][chunkIndex] * inputSampleBufferArray[i][chunkIndex];
-            }
-
-            //check if below zero
-            if (inputSampleBufferArray[streamIndex][chunkIndex] < 0)
-            {
-                minimalCount++;
-            }
-
-            //check if above zero
-            if (inputSampleBufferArray[streamIndex][chunkIndex] > 0)
-            {
-                maximalCount++;
-            }
+            minusCounter++;
         }
+    }
 
-//         all values are minimal
-        if (minimalCount == nrOfStreams)
+    int plusCounter = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        if (inputSampleBufferArray[i][chunkIndex] > 0)
         {
+            plusCounter++;
+        }
+    }
+
+
+
+//     std::cout << "minusCounter: " << minusCounter << std::endl;
+//     std::cout << "plusCounter: " << plusCounter << std::endl;
+    if (minusCounter >= 2)
+    {
+//         std::cout << "minus" << std::endl;
+        tempMixSampleResult = a + b + c + ((a * b * c - a*b - a*c - b*c) / std::numeric_limits<int16_t>::min());
+        outputSampleBuffer[chunkIndex] = tempMixSampleResult;
+        continue;
+    }
+
+    if (plusCounter >= 2)
+    {
+//         std::cout << "plus" << std::endl;
+        tempMixSampleResult = a + b + c + ((a * b * c - a*b - a*c - b*c) / std::numeric_limits<int16_t>::max());
+        outputSampleBuffer[chunkIndex] = tempMixSampleResult;
+        continue;
+    }
+
+//     std::cout << "default" << std::endl;
+    tempMixSampleResult = a + b + c + (a * b * c - a*b - a*c - b*c);
+    outputSampleBuffer[chunkIndex] = tempMixSampleResult;
+
+// //         all values are minimal
+//         if (minimalCount == nrOfStreams)
+//         {
+// //             outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] - (sampleProductBuffer[chunkIndex] / std::numeric_limits<int16_t>::min());
 //             outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] - (sampleProductBuffer[chunkIndex] / std::numeric_limits<int16_t>::min());
-            outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] - (sampleProductBuffer[chunkIndex] / std::numeric_limits<int16_t>::min());
-            continue;
-        }
-
-        //all values are maximal
-        if (maximalCount == nrOfStreams)
-        {
+//             continue;
+//         }
+// 
+//         //all values are maximal
+//         if (maximalCount == nrOfStreams)
+//         {
+// //             outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] - (sampleProductBuffer[chunkIndex] / std::numeric_limits<int16_t>::max());
 //             outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] - (sampleProductBuffer[chunkIndex] / std::numeric_limits<int16_t>::max());
-            outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] - (sampleProductBuffer[chunkIndex] / std::numeric_limits<int16_t>::max());
-            continue;
-        }
+//             continue;
+//         }
 
 
 //         if (minimalCount == nrOfStreams)
@@ -92,8 +162,7 @@ void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithSmoothNormalizat
 //         }
 //
 
-        //normalize and store
-        outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex];
+
     }
 }
 

@@ -1,6 +1,6 @@
 
 
-OBJ_FILES := MixerApplication.o MixerAlgorithmSimpleAddWithClipping.o MixerAlgorithmSimpleAddWithNormalization.o MixerAlgorithmSimpleAddWithSmoothNormalization.o
+OBJ_FILES := MixerApplication.o MixerAlgorithmSimpleAddWithClipping.o MixerAlgorithmSimpleAddWithNormalization.o MixerAlgorithmSimpleAddWithSmoothNormalization.o MixerAlgorithmRMSGainBeforeSum.o
 CPPFLAGS += -Wall
 LDFLAGS += -l sndfile
 APP_BINARY := mixerapplication

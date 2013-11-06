@@ -1,5 +1,5 @@
-#ifndef RINGBUFFER_H
-#define RINGBUFFER_H
+#ifndef RINGBUFFER_HPP
+#define RINGBUFFER_HPP
 
 #include <stdint.h>
 
@@ -7,12 +7,12 @@
 //ringbuffer rules
 //* read pointer can never overtake write pointer
 //* unread data can never be overwritten
-template<typename T, uint32_t ringBufferSizeInElements>
+template<typename T, const uint32_t ringBufferSizeInElements>
 class RingBuffer
 {
 
 public:
-    RingBuffer(bool overwriteData)
+    RingBuffer()
         : m_readIndex(0)
         , m_writeIndex(0)
     {}
@@ -30,7 +30,7 @@ public:
         if (readIndex > writeIndex) {
             free = readIndex - writeIndex - 1;
         } else {
-            free = (dataArrayElements - 1) - (writeIndex - readIndex);
+            free = (m_numberOfDataArrayElements - 1) - (writeIndex - readIndex);
         }
 
         //do not overwrite data
@@ -41,7 +41,7 @@ public:
         for (uint32_t i = 0; i < count; i++) {
             m_elements[writeIndex] = *pData++;
             //catch overrun
-            if (++writeIndex >= dataArrayElements) {
+            if (++writeIndex >= m_numberOfDataArrayElements) {
                 writeIndex = 0;
             }
         }
@@ -61,7 +61,7 @@ public:
         if (writeIndex >= readIndex) {
             used = writeIndex - readIndex;
         } else {
-            used = dataArrayElements - (readIndex - writeIndex);
+            used = m_numberOfDataArrayElements - (readIndex - writeIndex);
         }
 
         //do not overtake write pointer
@@ -72,7 +72,7 @@ public:
         for (uint32_t i = 0; i < count; i++) {
             *pData++ = m_elements[readIndex];
             //catch overrun
-            if (++readIndex >= dataArrayElements) {
+            if (++readIndex >= m_numberOfDataArrayElements) {
                 readIndex = 0;
             }
         }
@@ -90,29 +90,29 @@ public:
         if (writeIndex >= readIndex) {
             used = writeIndex - readIndex;
         } else {
-            used = dataArrayElements - (readIndex - writeIndex);
+            used = m_numberOfDataArrayElements - (readIndex - writeIndex);
         }
         return used;
     }
 
     inline uint32_t getRingBufferSizeInElements() const
     {
-        return dataArrayElements;
+        return m_numberOfDataArrayElements;
     }
 
     inline uint32_t getRingBufferDataSize() const
     {
-        return dataArrayElements * sizeof(T);
+        return m_numberOfDataArrayElements * sizeof(T);
     }
 
 private:
     RingBuffer(const RingBuffer&);
     RingBuffer& operator=(const RingBuffer&);
 
-    static const uint32_t dataArrayElements = ringBufferSizeInElements + 1;
+    static const uint32_t m_numberOfDataArrayElements = ringBufferSizeInElements + 1;
 
     //NOTE: hope this is continuous memory
-    T m_elements[dataArrayElements];
+    T m_elements[m_numberOfDataArrayElements];
     volatile uint32_t m_readIndex;
     volatile uint32_t m_writeIndex;
 };

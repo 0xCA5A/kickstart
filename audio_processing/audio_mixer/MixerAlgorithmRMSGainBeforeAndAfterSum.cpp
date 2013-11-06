@@ -31,7 +31,7 @@ MixerAlgorithmRMSGainBeforeAndAfterSum::MixerAlgorithmRMSGainBeforeAndAfterSum(s
 void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeAndAfterSum::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
 
-    int32_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+    int16_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 
     for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
     {
@@ -39,8 +39,8 @@ void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeAndAfterSum::mix
         for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex)
         {
             const int16_t originalSampleValue = inputSampleBufferArray[streamIndex][chunkIndex];
-            m_RMSCalculatorArray[streamIndex].putSample(&originalSampleValue);
-            rmsSum += m_RMSCalculatorArray[streamIndex].getRMSValue();
+            m_inputSignalRMSCalculatorArray[streamIndex].putSample(&originalSampleValue);
+            rmsSum += m_inputSignalRMSCalculatorArray[streamIndex].getRMSValue();
         }
 
         sampleSumBuffer[chunkIndex] = 0;
@@ -52,14 +52,17 @@ void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeAndAfterSum::mix
             if (rmsSum == 0) {
                 channelGain = 1;
             } else {
-                channelGain = (float)m_RMSCalculatorArray[streamIndex].getRMSValue() / rmsSum;
+                channelGain = (float)m_inputSignalRMSCalculatorArray[streamIndex].getRMSValue() / rmsSum;
             }
 
             sampleSumBuffer[chunkIndex] += channelGain * originalSampleValue;
         }
 
+        m_outputSignalRMSCalculator.putSample(&sampleSumBuffer[chunkIndex]);
+        float outputGain = (__MAXIMUM_OUTPUT_GAIN_VALUE_AS_FLOAT * std::numeric_limits<int16_t>::max()) / (float)m_outputSignalRMSCalculator.getRMSValue();
+
         //store
-        outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex];
+        outputSampleBuffer[chunkIndex] = outputGain * sampleSumBuffer[chunkIndex];
     }
 }
 

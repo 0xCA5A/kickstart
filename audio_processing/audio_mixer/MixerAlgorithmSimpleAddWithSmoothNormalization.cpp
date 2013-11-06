@@ -4,10 +4,9 @@
 #include <strings.h>
 
 #include "MixerAlgorithmSimpleAddWithSmoothNormalization.hpp"
-#include "../../../maglev/hwpacks/ESU-II/linux-3.2.0-psp04.06.00.08.sdk/arch/arm/nwfpe/ARM-gcc.h"
 
 
-// Solution 1: Quick and Dirty Maths
+// Quick and Dirty Maths
 // http://club15cc.com/code/ios/mixing-audio-without-clipping-limiters-etc
 
 

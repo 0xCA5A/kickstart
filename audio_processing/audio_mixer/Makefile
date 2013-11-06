@@ -2,7 +2,7 @@
 
 OBJ_FILES := MixerApplication.o MixerAlgorithmSimpleAddWithClipping.o MixerAlgorithmSimpleAddWithNormalization.o MixerAlgorithmSimpleAddWithSmoothNormalization.o MixerAlgorithmRMSGainBeforeSum.o MixerAlgorithmRMSGainBeforeAndAfterSum.o
 HEADER_FILES := $(wildcard *.hpp *.h)
-CPPFLAGS += -Wall
+CPPFLAGS += -Wall -O3
 LDFLAGS += -l sndfile
 APP_BINARY := mixerapplication
 

@@ -16,7 +16,7 @@ public:
     RMSCalculator()
         : m_writeIndex(0)
     {
-        PRINT_FORMATTED_INFO("create RMSCalculator, buffer size " << bufferSizeInSamples);
+        PRINT_FORMATTED_INFO("create RMSCalculator, buffer size " << bufferSizeInSamples << ", " << bufferSizeInSamples / (float)(16000 / 1000) << "ms @ 16khz");
         //inti buffer with zero samples
         memset(m_sampleBuffer, 0, bufferSizeInSamples * sizeof(T));
     }

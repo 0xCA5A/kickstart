@@ -5,6 +5,7 @@
 #include "MixerAlgorithmSimpleAddWithNormalization.hpp"
 #include "MixerAlgorithmSimpleAddWithSmoothNormalization.hpp"
 #include "MixerAlgorithmRMSGainBeforeSum.hpp"
+#include "MixerAlgorithmRMSGainBeforeAndAfterSum.hpp"
 
 
 int main(int argc, char* argv[])
@@ -22,6 +23,8 @@ int main(int argc, char* argv[])
 //     MixerAlgorithmSimpleAddWithSmoothNormalization mixerAlgorithmSimpleAddWithSmoothNormalization(algorithmName);
     algorithmName = "mixerAlgorithmRMSGainBeforeSum";
     MixerAlgorithmRMSGainBeforeSum mixerAlgorithmRMSGainBeforeSum(algorithmName);
+    algorithmName = "mixerAlgorithmRMSGainBeforeAndAfterSum";
+    MixerAlgorithmRMSGainBeforeAndAfterSum mixerAlgorithmRMSGainBeforeAndAfterSum(algorithmName);
 
     //start mixing
     mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithClipping);
@@ -40,6 +43,10 @@ int main(int argc, char* argv[])
     mixerApplication.setStrategy(&mixerAlgorithmRMSGainBeforeSum);
     const std::string mixerAlgorithmRMSGainBeforeSumMixFileName(mixerAlgorithmRMSGainBeforeSum.getAlgorithmIdentifier() + "MixResultData.wav");
     mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmRMSGainBeforeSumMixFileName);
+
+    mixerApplication.setStrategy(&mixerAlgorithmRMSGainBeforeAndAfterSum);
+    const std::string mixerAlgorithmRMSGainBeforeAndAfterSumMixFileName(mixerAlgorithmRMSGainBeforeAndAfterSum.getAlgorithmIdentifier() + "MixResultData.wav");
+    mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmRMSGainBeforeAndAfterSumMixFileName);
 
     return 0;
 }

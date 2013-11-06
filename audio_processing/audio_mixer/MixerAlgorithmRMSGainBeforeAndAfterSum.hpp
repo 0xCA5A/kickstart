@@ -1,5 +1,5 @@
-#ifndef MIXERALGORITHMRMSGAINBEFORESUM_HPP
-#define MIXERALGORITHMRMSGAINBEFORESUM_HPP
+#ifndef MIXERALGORITHMRMSGAINBEFOREANDAFTERSUM_HPP
+#define MIXERALGORITHMRMSGAINBEFOREANDAFTERSUM_HPP
 
 #include "MixerAlgorithm.hpp"
 #include "MixerAlgorithmDataElement.hpp"
@@ -20,13 +20,16 @@
  * @brief implementation of mixer that gains a signal depending on the RMS value before the sum
  *
  */
-class MixerAlgorithmRMSGainBeforeSum : public MixerAlgorithm
+class MixerAlgorithmRMSGainBeforeAndAfterSum : public MixerAlgorithm
 {
-
 public:
-    MixerAlgorithmRMSGainBeforeSum(std::string& algorithmName);
+    MixerAlgorithmRMSGainBeforeAndAfterSum(std::string& algorithmName);
     virtual void mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer);
     virtual MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return m_mixerAlgorithmDataElement;};
+
+private:
+    MixerAlgorithmRMSGainBeforeAndAfterSum(const MixerAlgorithmRMSGainBeforeAndAfterSum&);
+    MixerAlgorithmRMSGainBeforeAndAfterSum& operator=(const MixerAlgorithmRMSGainBeforeAndAfterSum&);
 
 private:
     MixerAlgorithmDataElement m_mixerAlgorithmDataElement;

@@ -23,6 +23,10 @@ public:
     virtual MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return m_mixerAlgorithmDataElement;};
 
 private:
+    MixerAlgorithmSimpleAddWithNormalization(const MixerAlgorithmSimpleAddWithNormalization&);
+    MixerAlgorithmSimpleAddWithNormalization& operator=(const MixerAlgorithmSimpleAddWithNormalization&);
+
+private:
     MixerAlgorithmDataElement m_mixerAlgorithmDataElement;
 };
 

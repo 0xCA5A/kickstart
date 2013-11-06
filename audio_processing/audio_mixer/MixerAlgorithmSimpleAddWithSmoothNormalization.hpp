@@ -15,7 +15,6 @@
  */
 class MixerAlgorithmSimpleAddWithSmoothNormalization : public MixerAlgorithm
 {
-
 public:
     MixerAlgorithmSimpleAddWithSmoothNormalization(std::string& algorithmName)
         : MixerAlgorithm(algorithmName), m_mixerAlgorithmDataElement(__NR_OF_SAMPLES_PER_CHUNK) {}

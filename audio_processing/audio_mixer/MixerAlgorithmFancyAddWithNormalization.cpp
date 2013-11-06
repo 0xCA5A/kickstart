@@ -4,7 +4,7 @@
 #include "MixerAlgorithmSimpleAddWithNormalization.hpp"
 
 
-void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithNormalization::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
+void __attribute__((optimize("O3")) MixerAlgorithmSimpleAddWithNormalization::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer))
 {
 
     int64_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];

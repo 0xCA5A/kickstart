@@ -10,7 +10,6 @@
 template<typename T, const uint32_t ringBufferSizeInElements>
 class RingBuffer
 {
-
 public:
     RingBuffer()
         : m_readIndex(0)

@@ -2,7 +2,7 @@
 #include <typeinfo>
 
 #include <limits>
-#include "MixerAlgorithmRMSGainBeforeSum.hpp"
+#include "MixerAlgorithmRMSGainBeforeAndAfterSum.hpp"
 #include "RMSCalculator.hpp"
 
 
@@ -13,7 +13,7 @@
 //FIXME: the number of streams to mix has to be knows here to prepare the structures in a proper way...
 // * define max channels and init structures for max channels (dirty)
 // * init structures on first access (dirty)
-MixerAlgorithmRMSGainBeforeSum::MixerAlgorithmRMSGainBeforeSum(std::string& algorithmName)
+MixerAlgorithmRMSGainBeforeAndAfterSum::MixerAlgorithmRMSGainBeforeAndAfterSum(std::string& algorithmName)
     : MixerAlgorithm(algorithmName), m_mixerAlgorithmDataElement(__NR_OF_SAMPLES_PER_CHUNK)
 {
 }
@@ -28,7 +28,7 @@ MixerAlgorithmRMSGainBeforeSum::MixerAlgorithmRMSGainBeforeSum(std::string& algo
  * @param outputSampleBuffer buffer to store the result, 'chunk size' samples
  * @return void
  */
-void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeSum::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
+void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeAndAfterSum::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
 
     int32_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];

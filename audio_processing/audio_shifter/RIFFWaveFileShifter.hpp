@@ -3,6 +3,8 @@
 
 #include <sndfile.h>
 
+#define __SIZE_OF_SAMPLE_BUFFER_IN_SAMPLES  (1024 * 512)
+
 class RIFFWaveFileShifter
 {
 public:

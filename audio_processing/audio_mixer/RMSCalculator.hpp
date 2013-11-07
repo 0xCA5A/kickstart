@@ -8,6 +8,12 @@
 #include "PrintMacros.hpp"
 
 
+
+/**
+ * @brief class to calculate the root mean square (RMS) over a data buffer
+ * note: check sample data type, int16_t, uint16_t, int32_t, uint32_t are supported
+ *
+ */
 template<typename T, const uint32_t bufferSizeInSamples>
 class RMSCalculator
 {
@@ -18,7 +24,8 @@ public:
     {
         PRINT_FORMATTED_INFO("create RMSCalculator, buffer size " << bufferSizeInSamples << ", " << bufferSizeInSamples / (float)(16000 / 1000) << "ms @ 16khz");
         //inti buffer with zero samples
-        memset(m_sampleBuffer, 0, bufferSizeInSamples * sizeof(T));
+        memset(m_sampleBuffer, 0, bufferSizeInSamples * sizeof(m_sampleBuffer[0]));
+        memset(m_sampleSquareBuffer, 0, bufferSizeInSamples * sizeof(m_sampleSquareBuffer[0]));
     }
 
     ~RMSCalculator()
@@ -30,6 +37,7 @@ public:
             m_writeIndex = 0;
         }
         m_sampleBuffer[m_writeIndex] = *pData;
+        m_sampleSquareBuffer[m_writeIndex] = *pData * *pData;
     }
 
     void putSamples(const T* pData, uint32_t count)
@@ -58,13 +66,13 @@ public:
 
     T getRMSValue(void) __attribute__((optimize("O3"))) 
     {
-        int64_t superBigSmapleBuffer = 0;
+        unsigned long long superBigSmapleSquareBuffer = 0;
         for (uint32_t i = 0; i < m_bufferSizeInSamples; i++) {
-            superBigSmapleBuffer += (m_sampleBuffer[i] * m_sampleBuffer[i]);
+            superBigSmapleSquareBuffer += m_sampleSquareBuffer[i];
         }
-        superBigSmapleBuffer /= m_bufferSizeInSamples;
+        superBigSmapleSquareBuffer /= m_bufferSizeInSamples;
 
-        return round(sqrt(superBigSmapleBuffer));
+        return round(sqrt(superBigSmapleSquareBuffer));
     }
 
     inline uint32_t getBufferSizeInSamples() const
@@ -86,6 +94,9 @@ private:
 
     //NOTE: hope this is continuous memory
     T m_sampleBuffer[m_bufferSizeInSamples];
+    //NOTE: this should be enough for samples int16_t, uint16_t, int32_t, uint32_t
+    // if sizeof(m_sampleBuffer[0]) > sizeof(uint64_t) / 2, we might have a problem
+    uint64_t m_sampleSquareBuffer[m_bufferSizeInSamples];
     volatile uint32_t m_writeIndex;
 };
 

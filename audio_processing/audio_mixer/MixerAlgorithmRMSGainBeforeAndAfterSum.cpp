@@ -58,11 +58,12 @@ void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeAndAfterSum::mix
             sampleSumBuffer[chunkIndex] += channelGain * originalSampleValue;
         }
 
+        // output sample gain
         m_outputSignalRMSCalculator.putSample(&sampleSumBuffer[chunkIndex]);
-        float outputGain = (__MAXIMUM_OUTPUT_GAIN_VALUE_AS_FLOAT * std::numeric_limits<int16_t>::max()) / (float)m_outputSignalRMSCalculator.getRMSValue();
+        float outputGain = (__MAXIMUM_OUTPUT_GAIN_VALUE_AS_FLOAT) / ((float)m_outputSignalRMSCalculator.getRMSValue() / (float)std::numeric_limits<int16_t>::max());
 
         //store
-        outputSampleBuffer[chunkIndex] = outputGain * sampleSumBuffer[chunkIndex];
+        outputSampleBuffer[chunkIndex] = (int16_t)(outputGain * sampleSumBuffer[chunkIndex]);
     }
 }
 

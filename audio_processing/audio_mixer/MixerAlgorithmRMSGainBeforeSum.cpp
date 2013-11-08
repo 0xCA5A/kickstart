@@ -30,22 +30,18 @@ MixerAlgorithmRMSGainBeforeSum::MixerAlgorithmRMSGainBeforeSum(std::string& algo
  */
 void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeSum::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
-
     int16_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 
-    for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
-    {
+    for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex) {
         uint32_t rmsSum = 0;
-        for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex)
-        {
+        for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex) {
             const int16_t originalSampleValue = inputSampleBufferArray[streamIndex][chunkIndex];
             m_inputSignalRMSCalculatorArray[streamIndex].putSample(&originalSampleValue);
             rmsSum += m_inputSignalRMSCalculatorArray[streamIndex].getRMSValue();
         }
 
         sampleSumBuffer[chunkIndex] = 0;
-        for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex)
-        {
+        for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex) {
             const int16_t originalSampleValue = inputSampleBufferArray[streamIndex][chunkIndex];
 
             float channelGain;

@@ -6,14 +6,6 @@
 #include "RMSCalculator.hpp"
 
 
-#define __NR_OF_SAMPLES_PER_CHUNK 1
-
-// 16000 samples per second @ 16khz sampling rate
-// 1ms ~ 16 samples - 64ms ~ 1024 samples
-#define __NR_OF_INPUT_SIGNAL_RMSCALCULATOR_BUFFER_SIZE_IN_SAMPLES  1024
-#define __NR_OF_OUTPUT_SIGNAL_RMSCALCULATOR_BUFFER_SIZE_IN_SAMPLES  512
-
-#define __MAXIMUM_OUTPUT_GAIN_VALUE_AS_FLOAT 0.2
 
 #define FIXME_FIXME_FIXME_MAX_NR_OF_CHANNELS 24
 
@@ -28,16 +20,24 @@ class MixerAlgorithmRMSGainBeforeAndAfterSum : public MixerAlgorithm
 public:
     MixerAlgorithmRMSGainBeforeAndAfterSum(std::string& algorithmName);
     virtual void mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer);
-    virtual MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return m_mixerAlgorithmDataElement;};
+    virtual void printAlgorithmConfiguration(void) const;
+    virtual inline const MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return s_mixerAlgorithmDataElement;};
 
 private:
     MixerAlgorithmRMSGainBeforeAndAfterSum(const MixerAlgorithmRMSGainBeforeAndAfterSum&);
     MixerAlgorithmRMSGainBeforeAndAfterSum& operator=(const MixerAlgorithmRMSGainBeforeAndAfterSum&);
 
 private:
-    MixerAlgorithmDataElement m_mixerAlgorithmDataElement;
-    RMSCalculator<int16_t, __NR_OF_INPUT_SIGNAL_RMSCALCULATOR_BUFFER_SIZE_IN_SAMPLES> m_inputSignalRMSCalculatorArray[FIXME_FIXME_FIXME_MAX_NR_OF_CHANNELS];
-    RMSCalculator<int16_t, __NR_OF_OUTPUT_SIGNAL_RMSCALCULATOR_BUFFER_SIZE_IN_SAMPLES> m_outputSignalRMSCalculator;
+    static const MixerAlgorithmDataElement s_mixerAlgorithmDataElement;
+    static const uint32_t s_nrOfSamplesPerChunk = 1;
+    // 16000 samples per second @ 16khz sampling rate
+    // 1ms ~ 16 samples - 64ms ~ 1024 samples
+    static const uint32_t s_inputSignalRMSCalculatorBufferSizeInSample = 1024;
+    static const uint32_t s_outputSignalRMSCalculatorBufferSizeInSample = 2048;
+    static const float s_staticOutputSampleGain = 0.3;
+
+    RMSCalculator<int16_t, s_inputSignalRMSCalculatorBufferSizeInSample> m_inputSignalRMSCalculatorArray[FIXME_FIXME_FIXME_MAX_NR_OF_CHANNELS];
+    RMSCalculator<int16_t, s_outputSignalRMSCalculatorBufferSizeInSample> m_outputSignalRMSCalculator;
 };
 
 #endif

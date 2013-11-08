@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
+#include <limits>
 #include <iostream>
 #include "PrintMacros.hpp"
 
@@ -11,7 +12,7 @@
 
 /**
  * @brief class to calculate the root mean square (RMS) over a data buffer
- * note: check sample data type, int16_t, uint16_t, int32_t, uint32_t are supported
+ * note: check sample data type, int16_t, int32_t are supported (square values are stored in uint64_t)
  *
  */
 template<typename T, const uint32_t bufferSizeInSamples>
@@ -64,7 +65,7 @@ public:
         std::cout << std::endl;
     }
 
-    T getRMSValue(void) __attribute__((optimize("O3"))) 
+    double getRMSValue(void)
     {
         unsigned long long superBigSmapleSquareBuffer = 0;
         for (uint32_t i = 0; i < m_bufferSizeInSamples; i++) {
@@ -72,15 +73,26 @@ public:
         }
         superBigSmapleSquareBuffer /= m_bufferSizeInSamples;
 
-        return round(sqrt(superBigSmapleSquareBuffer));
+        return sqrt(superBigSmapleSquareBuffer);
     }
 
-    inline uint32_t getBufferSizeInSamples() const
+    double getMaxRMSValue(void)
+    {
+        //http://www.wolframalpha.com/input/?i=sqrt%28%28%28%28%282^16%29%29%2F2%29^2+%2B+%28%28%282^16%29%29%2F2%29^2%2B+%28%28%282^16%29%29%2F2%29^2%29%2F3%29
+        return std::numeric_limits<T>::max();
+    }
+
+    inline double getMinRMSValue(void)
+    {
+        return 0;
+    }
+
+    uint32_t getBufferSizeInSamples() const
     {
         return m_bufferSizeInSamples;
     }
 
-    inline uint32_t getBufferDataSizeInByte() const
+    uint32_t getBufferDataSizeInByte() const
     {
         return m_bufferSizeInSamples * sizeof(T);
     }

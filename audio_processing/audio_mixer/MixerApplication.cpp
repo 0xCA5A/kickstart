@@ -129,8 +129,6 @@ void MixerApplication::setStrategy(MixerAlgorithm* const mixerAlgorithm)
 
 void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
 {
-    tryToRewindRIFFWAVEFiles();
-
     //check if mixer strategy is set
     if (m_p_mixerAlgorithm == 0)
     {
@@ -138,6 +136,9 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
         return;
     }
     PRINT_FORMATTED_INFO("mixer strategy " << m_p_mixerAlgorithm->getAlgorithmIdentifier() << " selected");
+    m_p_mixerAlgorithm->printAlgorithmConfiguration();
+
+    tryToRewindRIFFWAVEFiles();
 
     //init sf info structure
     SF_INFO mixSfInfo;
@@ -160,7 +161,7 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
     }
 
     //get algorithm data element prototype
-    MixerAlgorithmDataElement& mixerAlgorithmDataElementPrototype = m_p_mixerAlgorithm->getMixerAlgorithmDataElementPrototype();
+    const MixerAlgorithmDataElement& mixerAlgorithmDataElementPrototype = m_p_mixerAlgorithm->getMixerAlgorithmDataElementPrototype();
 
     //prepare dynamic buffers, allocate memory
     PRINT_FORMATTED_INFO("prepare internal 16bit buffers...");

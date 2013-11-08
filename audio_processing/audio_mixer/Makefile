@@ -1,6 +1,6 @@
 
 
-OBJ_FILES := MixerApplication.o MixerAlgorithmSimpleAddWithClipping.o MixerAlgorithmSimpleAddWithNormalization.o MixerAlgorithmSimpleAddWithSmoothNormalization.o MixerAlgorithmRMSGainBeforeSum.o MixerAlgorithmRMSGainBeforeAndAfterSum.o
+OBJ_FILES := MixerApplication.o MixerAlgorithmSimpleAddWithClipping.o MixerAlgorithmSimpleAddWithNormalization.o MixerAlgorithmSimpleAddWithSmoothNormalization.o MixerAlgorithmRMSGainBeforeSum.o MixerAlgorithmRMSGainBeforeAndAfterSum.o MixerAlgorithmRMSGainAfterSum.o
 HEADER_FILES := $(wildcard *.hpp *.h)
 CPPFLAGS += -Wall -O3
 LDFLAGS += -l sndfile

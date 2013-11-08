@@ -10,6 +10,9 @@
 // http://club15cc.com/code/ios/mixing-audio-without-clipping-limiters-etc
 
 
+const MixerAlgorithmDataElement MixerAlgorithmSimpleAddWithSmoothNormalization::s_mixerAlgorithmDataElement(MixerAlgorithmSimpleAddWithSmoothNormalization::s_nrOfSamplesPerChunk);
+
+
 
 
 /**
@@ -23,14 +26,14 @@
 void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithSmoothNormalization::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
 
-    int64_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
-    int64_t sampleProductBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
-    int64_t coefficientSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+    int64_t sampleSumBuffer[s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+    int64_t sampleProductBuffer[s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+    int64_t coefficientSumBuffer[s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 
 //     int32_t tempResult[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 //     bzero(tempResult, m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk() * (sizeof(int16_t)));
     
-    for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
+    for (uint32_t chunkIndex = 0; chunkIndex < s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
     {
 //         sampleSumBuffer[chunkIndex] = 0;
 //         sampleProductBuffer[chunkIndex] = 1;

@@ -17,6 +17,7 @@ all: $(OBJ_FILES) $(HEADER_FILES)
 clean:
 	rm -f *.o
 	rm -f $(APP_BINARY)
-
-doc:
+	rm doc/html -rf
+	
+doxygen:
 	cd doc; doxygen Doxyfile; cd -

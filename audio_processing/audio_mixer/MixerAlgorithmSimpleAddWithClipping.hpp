@@ -6,9 +6,6 @@
 #include "MixerAlgorithmDataElement.hpp"
 
 
-#define __NR_OF_SAMPLES_PER_CHUNK 1
-
-
 /**
  * @brief implementation of simple fix point sample add algorithm with hard clipping (no normalization)
  *
@@ -18,12 +15,14 @@ class MixerAlgorithmSimpleAddWithClipping : public MixerAlgorithm
 
 public:
     MixerAlgorithmSimpleAddWithClipping(std::string& algorithmName)
-        : MixerAlgorithm(algorithmName), m_mixerAlgorithmDataElement(__NR_OF_SAMPLES_PER_CHUNK) {}
+        : MixerAlgorithm(algorithmName) {}
     virtual void mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer);
-    virtual MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return m_mixerAlgorithmDataElement;};
+    virtual void printAlgorithmConfiguration(void) const;
+    virtual inline const MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return s_mixerAlgorithmDataElement;};
 
 private:
-    MixerAlgorithmDataElement m_mixerAlgorithmDataElement;
+    static const MixerAlgorithmDataElement s_mixerAlgorithmDataElement;
+    static const uint32_t s_nrOfSamplesPerChunk = 1;
 };
 
 #endif

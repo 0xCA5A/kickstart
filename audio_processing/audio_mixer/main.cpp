@@ -3,7 +3,7 @@
 #include "MixerApplication.hpp"
 #include "MixerAlgorithmSimpleAddWithClipping.hpp"
 #include "MixerAlgorithmSimpleAddWithNormalization.hpp"
-#include "MixerAlgorithmSimpleAddWithSmoothNormalization.hpp"
+#include "MixerAlgorithmFancyAddWithNormalization.hpp"
 #include "MixerAlgorithmRMSGainBeforeSum.hpp"
 #include "MixerAlgorithmRMSGainBeforeAndAfterSum.hpp"
 #include "MixerAlgorithmRMSGainAfterSum.hpp"
@@ -23,8 +23,8 @@ int main(int argc, char* argv[])
     algorithmName = "mixerAlgorithmSimpleAddWithNormalization";
     MixerAlgorithmSimpleAddWithNormalization mixerAlgorithmSimpleAddWithNormalization(algorithmName);
 
-    algorithmName = "mixerAlgorithmSimpleAddWithSmoothNormalization";
-    MixerAlgorithmSimpleAddWithSmoothNormalization mixerAlgorithmSimpleAddWithSmoothNormalization(algorithmName);
+    algorithmName = "mixerAlgorithmFancyAddWithNormalization";
+    MixerAlgorithmFancyAddWithNormalization mixerAlgorithmFancyAddWithNormalization(algorithmName);
 
     algorithmName = "mixerAlgorithmRMSGainBeforeSum";
     MixerAlgorithmRMSGainBeforeSum mixerAlgorithmRMSGainBeforeSum(algorithmName);
@@ -37,17 +37,17 @@ int main(int argc, char* argv[])
 
 
     //start mixing
-//     mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithClipping);
-//     const std::string mixerAlgorithmSimpleAddWithClippingMixOutputFileName(mixerAlgorithmSimpleAddWithClipping.getAlgorithmIdentifier() + "MixResultData.wav");
-//     mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmSimpleAddWithClippingMixOutputFileName);
-// 
-//     mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithNormalization);
-//     const std::string mixerAlgorithmSimpleAddWithNormalizationMixFileName(mixerAlgorithmSimpleAddWithNormalization.getAlgorithmIdentifier() + "MixResultData.wav");
-//     mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmSimpleAddWithNormalizationMixFileName);
-// 
-//     mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithSmoothNormalization);
-//     const std::string mixerAlgorithmSimpleAddWithSmoothNormalizationMixFileName(mixerAlgorithmSimpleAddWithSmoothNormalization.getAlgorithmIdentifier() + "MixResultData.wav");
-//     mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmSimpleAddWithSmoothNormalizationMixFileName);
+    mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithClipping);
+    const std::string mixerAlgorithmSimpleAddWithClippingMixOutputFileName(mixerAlgorithmSimpleAddWithClipping.getAlgorithmIdentifier() + "MixResultData.wav");
+    mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmSimpleAddWithClippingMixOutputFileName);
+
+    mixerApplication.setStrategy(&mixerAlgorithmSimpleAddWithNormalization);
+    const std::string mixerAlgorithmSimpleAddWithNormalizationMixFileName(mixerAlgorithmSimpleAddWithNormalization.getAlgorithmIdentifier() + "MixResultData.wav");
+    mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmSimpleAddWithNormalizationMixFileName);
+
+    mixerApplication.setStrategy(&mixerAlgorithmFancyAddWithNormalization);
+    const std::string mixerAlgorithmFancyAddWithNormalizationMixFileName(mixerAlgorithmFancyAddWithNormalization.getAlgorithmIdentifier() + "MixResultData.wav");
+    mixerApplication.mixRIFFWAVEFiles(mixerAlgorithmFancyAddWithNormalizationMixFileName);
 
     mixerApplication.setStrategy(&mixerAlgorithmRMSGainBeforeSum);
     const std::string mixerAlgorithmRMSGainBeforeSumMixFileName(mixerAlgorithmRMSGainBeforeSum.getAlgorithmIdentifier() + "MixResultData.wav");

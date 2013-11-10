@@ -1,27 +1,41 @@
 #include <iostream>
 #include <typeinfo>
 
+
 #include <limits>
 #include "MixerAlgorithmRMSGainBeforeSum.hpp"
 #include "RMSCalculator.hpp"
 
 
-// TODO:
-// make this generic (template)
+const MixerAlgorithmDataElement MixerAlgorithmRMSGainBeforeSum::s_mixerAlgorithmDataElement(MixerAlgorithmRMSGainBeforeSum::s_nrOfSamplesPerChunk);
 
 
-//FIXME: the number of streams to mix has to be knows here to prepare the structures in a proper way...
-// * define max channels and init structures for max channels (dirty)
-// * init structures on first access (dirty)
-MixerAlgorithmRMSGainBeforeSum::MixerAlgorithmRMSGainBeforeSum(std::string& algorithmName)
-    : MixerAlgorithm(algorithmName), m_mixerAlgorithmDataElement(__NR_OF_SAMPLES_PER_CHUNK)
+
+MixerAlgorithmRMSGainBeforeSum::MixerAlgorithmRMSGainBeforeSum(std::string& algorithmName, const uint32_t nrOfStreams)
+    : MixerAlgorithm(algorithmName)
 {
+    m_inputSignalRMSCalculatorArray = new RMSCalculator<int16_t, s_inputSignalRMSCalculatorBufferSizeInSample>[nrOfStreams];
+}
+
+
+MixerAlgorithmRMSGainBeforeSum::~MixerAlgorithmRMSGainBeforeSum(void)
+{
+    delete[] m_inputSignalRMSCalculatorArray;
+}
+
+
+void MixerAlgorithmRMSGainBeforeSum::printAlgorithmConfiguration(void) const
+{
+    MixerAlgorithm::printAlgorithmConfiguration();
+    PRINT_FORMATTED_INFO("number of samples per data chunk: " << s_nrOfSamplesPerChunk);
+    PRINT_FORMATTED_INFO("static output sample gain factor: " << s_staticOutputSampleGainFactor);
+    PRINT_FORMATTED_INFO("nr of elements in input signal RMS calculator buffer: " << s_inputSignalRMSCalculatorBufferSizeInSample);
 }
 
 
 /**
  * @brief mix the samples depending on a calculated rms value
- * NOTE: 
+ * rms value is calculated for each input stream, stream gain depends on the stream rms value
  *
  * @param inputSampleBufferArray input data structure, pointer to 2d array holding 'no of streams' x 'chunk size' data samples
  * @param nrOfStreams number of mixer input streams
@@ -30,9 +44,9 @@ MixerAlgorithmRMSGainBeforeSum::MixerAlgorithmRMSGainBeforeSum(std::string& algo
  */
 void __attribute__((optimize("O3"))) MixerAlgorithmRMSGainBeforeSum::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
-    int16_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+    int16_t sampleSumBuffer[s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 
-    for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex) {
+    for (uint32_t chunkIndex = 0; chunkIndex < s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex) {
         uint32_t rmsSum = 0;
         for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex) {
             const int16_t originalSampleValue = inputSampleBufferArray[streamIndex][chunkIndex];

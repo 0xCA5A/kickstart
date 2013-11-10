@@ -1,9 +1,10 @@
-#include <iostream>
 #include <sndfile.h>
 #include <cstdlib>
 #include <strings.h>
 #include <limits>
 #include <cstring>
+#include <cstdio>
+#include <ctime>
 
 #include "MixerApplication.hpp"
 #include "MixerAlgorithmDataElement.hpp"
@@ -173,6 +174,9 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
     int16_t* p_outputSampleBuffer = new int16_t[mixerAlgorithmDataElementPrototype.getNrOfSamplesPerChunk()];
 
     PRINT_FORMATTED_INFO("mix " << getMaximumNrOfFramesInFiles() << " samples ";
+
+    std::clock_t start;
+    start = std::clock();
     for (uint32_t chunkIndex = 0; chunkIndex < (getMaximumNrOfFramesInFiles() / mixerAlgorithmDataElementPrototype.getNrOfSamplesPerChunk()); ++chunkIndex)
     {
         //read the data from file to process data structure
@@ -192,7 +196,7 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
         //TODO: change api to something like in mpg123, feed samples and the algorithm does something if enough samples feeded...
         m_p_mixerAlgorithm->mixSamples(pp_inputSampleBufferArray, m_nrOfInputFiles, p_outputSampleBuffer);
 
-        if (chunkIndex % 256 == 0)
+        if (chunkIndex % 1024 == 0)
         {
             std::cout << ".";
         }
@@ -200,7 +204,10 @@ void MixerApplication::mixRIFFWAVEFiles(const std::string& riffWaveMixFileName)
         //write mixed data to file
         sf_write_short(mixFileHandler, p_outputSampleBuffer, mixerAlgorithmDataElementPrototype.getNrOfSamplesPerChunk());
     }
+    double mixDuration = ( std::clock() - start);
     std::cout << " done!");
+    PRINT_FORMATTED_INFO("total mix duration in clocks: " << mixDuration);
+    PRINT_FORMATTED_INFO("total mix duration in seconds: " << mixDuration / (double) CLOCKS_PER_SEC);
 
     //delete data structures
     PRINT_FORMATTED_INFO("delete internal buffers...");

@@ -1,22 +1,17 @@
 #include <iostream>
 #include <typeinfo>
 
+
 #include "MixerAlgorithmSimpleAddWithNormalization.hpp"
 
 
-// short sample1 = ...;
-// short sample2 = ...;
-// float samplef1 = sample1 / 32768.0f;
-// float samplef2 = sample2 / 32768.0f;
-// float mixed = samplef1 + sample2f;
-// // reduce the volume a bit:
-// mixed *= 0.8;
-// // hard clipping
-// if (mixed > 1.0f) mixed = 1.0f;
-// if (mixed < -1.0f) mixed = -1.0f;
-// short outputSample = (short)(mixed * 32768.0f)
+const MixerAlgorithmDataElement MixerAlgorithmSimpleAddWithNormalization::s_mixerAlgorithmDataElement(MixerAlgorithmSimpleAddWithNormalization::s_nrOfSamplesPerChunk);
 
-// source: http://de.softuses.com/42658
+
+void MixerAlgorithmSimpleAddWithNormalization::printAlgorithmConfiguration(void) const
+{
+    MixerAlgorithm::printAlgorithmConfiguration();
+}
 
 
 /**
@@ -30,9 +25,9 @@
 void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithNormalization::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
 
-    int64_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+    int64_t sampleSumBuffer[s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 
-    for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
+    for (uint32_t chunkIndex = 0; chunkIndex < s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
     {
         sampleSumBuffer[chunkIndex] = 0;
         for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex)
@@ -44,4 +39,3 @@ void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithNormalization::m
         outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex] / nrOfStreams;
     }
 }
-

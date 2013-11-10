@@ -5,9 +5,17 @@
 #include "MixerAlgorithmSimpleAddWithClipping.hpp"
 
 
+const MixerAlgorithmDataElement MixerAlgorithmSimpleAddWithClipping::s_mixerAlgorithmDataElement(MixerAlgorithmSimpleAddWithClipping::s_nrOfSamplesPerChunk);
+
+
+void MixerAlgorithmSimpleAddWithClipping::printAlgorithmConfiguration(void) const
+{
+    MixerAlgorithm::printAlgorithmConfiguration();
+}
+
+
 /**
  * @brief mix samples as simple as possible
- * NOTE: mixer result is wrong with more than two data streams due to bad overflow / underflow detection!
  *
  * @param inputSampleBufferArray input data structure, pointer to 2d array holding 'no of streams' x 'chunk size' data samples
  * @param nrOfStreams number of mixer input streams
@@ -17,9 +25,9 @@
 void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithClipping::mixSamples(int16_t** const inputSampleBufferArray, const uint32_t nrOfStreams, int16_t* const outputSampleBuffer)
 {
 
-    int64_t sampleSumBuffer[m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
+    int64_t sampleSumBuffer[s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk()];
 
-    for (uint32_t chunkIndex = 0; chunkIndex < m_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
+    for (uint32_t chunkIndex = 0; chunkIndex < s_mixerAlgorithmDataElement.getNrOfSamplesPerChunk(); ++chunkIndex)
     {
         sampleSumBuffer[chunkIndex] = 0;
         for (uint32_t streamIndex = 0; streamIndex < nrOfStreams; ++streamIndex)
@@ -42,7 +50,7 @@ void __attribute__((optimize("O3"))) MixerAlgorithmSimpleAddWithClipping::mixSam
             sampleSumBuffer[chunkIndex] += inputSampleBufferArray[streamIndex][chunkIndex];
         }
 
-        //store
+        //store values
         outputSampleBuffer[chunkIndex] = sampleSumBuffer[chunkIndex];
     }
 }

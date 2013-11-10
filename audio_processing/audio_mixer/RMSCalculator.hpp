@@ -76,10 +76,11 @@ public:
         return sqrt(superBigSmapleSquareBuffer);
     }
 
-    double getMaxRMSValue(void)
+    inline double getMaxRMSValue(void)
     {
-        //http://www.wolframalpha.com/input/?i=sqrt%28%28%28%28%282^16%29%29%2F2%29^2+%2B+%28%28%282^16%29%29%2F2%29^2%2B+%28%28%282^16%29%29%2F2%29^2%29%2F3%29
-        return std::numeric_limits<T>::max();
+        //http://en.wikipedia.org/wiki/Root_mean_square
+        //http://www.wolframalpha.com/input/?i=sqrt%28%28%28%28%28%282^16%29%29%2F2%29^2%29+%2B+%28%28%28%282^16%29%29%2F2%29^2%29+%2B+%28%28%28%282^16%29%29%2F2%29^2%29+%2B+%28%28%28%282^16%29%29%2F2%29^2%29+%29%2F4%29
+        return std::numeric_limits<T>::max() / sqrt(2);
     }
 
     inline double getMinRMSValue(void)

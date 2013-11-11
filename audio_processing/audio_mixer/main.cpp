@@ -27,10 +27,10 @@ int main(int argc, char* argv[])
     MixerAlgorithmFancyAddWithNormalization mixerAlgorithmFancyAddWithNormalization(algorithmName);
 
     algorithmName = "mixerAlgorithmRMSGainBeforeSum";
-    MixerAlgorithmRMSGainBeforeSum mixerAlgorithmRMSGainBeforeSum(algorithmName);
+    MixerAlgorithmRMSGainBeforeSum mixerAlgorithmRMSGainBeforeSum(algorithmName, mixerApplication.getNrOfInputFiles());
 
     algorithmName = "mixerAlgorithmRMSGainBeforeAndAfterSum";
-    MixerAlgorithmRMSGainBeforeAndAfterSum mixerAlgorithmRMSGainBeforeAndAfterSum(algorithmName);
+    MixerAlgorithmRMSGainBeforeAndAfterSum mixerAlgorithmRMSGainBeforeAndAfterSum(algorithmName, mixerApplication.getNrOfInputFiles());
 
     algorithmName = "mixerAlgorithmRMSGainAfterSum";
     MixerAlgorithmRMSGainAfterSum mixerAlgorithmRMSGainAfterSum(algorithmName);

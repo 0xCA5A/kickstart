@@ -15,6 +15,7 @@ public:
     ~MixerApplication(void);
     void setStrategy(MixerAlgorithm* const mixerAlgorithm);
     void mixRIFFWAVEFiles(const std::string& riffWaveMixFileName);
+    const uint32_t getNrOfInputFiles(void) const {return m_nrOfInputFiles;};
 
 private:
     MixerApplication(const MixerApplication&);

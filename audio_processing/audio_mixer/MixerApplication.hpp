@@ -30,7 +30,6 @@ private:
     MixerAlgorithm* m_p_mixerAlgorithm;
     SF_INFO* m_p_soundFileInfoArray;
     SNDFILE** m_p_soundFileHandlerArray;
-    char* m_soundFileNameArray[];
     uint32_t m_nrOfInputFiles;
     float* m_p_gainFactorArray;
     std::list<std::string> m_mixerInputRIFFWAVEFileNameList;

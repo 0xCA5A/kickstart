@@ -1,12 +1,12 @@
 
 
-OBJ_FILES := RIFFWaveFileShifter.o
+OBJ_FILES := main.o RIFFWaveFileShifter.o
 CPPFLAGS += -Wall -Werror
 APP_BINARY := riffwavefileshifter
 
 
 all: $(OBJ_FILES)
-	g++ $(CPPFLAGS) -o $(APP_BINARY) main.cpp $(OBJ_FILES) -lsndfile
+	g++ $(CPPFLAGS) -o $(APP_BINARY) $(OBJ_FILES) -lsndfile
 
 clean:
 	rm -f *.o

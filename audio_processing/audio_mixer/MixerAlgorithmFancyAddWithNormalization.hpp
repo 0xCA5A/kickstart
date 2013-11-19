@@ -17,6 +17,10 @@ public:
     inline void addSamplesWithNoClipping(const int16_t& sampleA, const int16_t& sampleB, int16_t& outputSample);
 
 private:
+    MixerAlgorithmFancyAddWithNormalization(const MixerAlgorithmFancyAddWithNormalization&);
+    MixerAlgorithmFancyAddWithNormalization& operator=(const MixerAlgorithmFancyAddWithNormalization&);
+
+private:
     static const MixerAlgorithmDataElement s_mixerAlgorithmDataElement;
     static const uint32_t s_nrOfSamplesPerChunk = 1;
 };

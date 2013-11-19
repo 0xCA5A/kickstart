@@ -17,6 +17,10 @@ public:
     virtual inline const MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return s_mixerAlgorithmDataElement;};
 
 private:
+    MixerAlgorithmSimpleAddWithNormalization(const MixerAlgorithmSimpleAddWithNormalization&);
+    MixerAlgorithmSimpleAddWithNormalization& operator=(const MixerAlgorithmSimpleAddWithNormalization&);
+
+private:
     static const MixerAlgorithmDataElement s_mixerAlgorithmDataElement;
     static const uint32_t s_nrOfSamplesPerChunk = 1;
 };

@@ -18,6 +18,10 @@ public:
     virtual inline const MixerAlgorithmDataElement& getMixerAlgorithmDataElementPrototype(void) {return s_mixerAlgorithmDataElement;};
 
 private:
+    MixerAlgorithmRMSGainBeforeSum(const MixerAlgorithmRMSGainBeforeSum&);
+    MixerAlgorithmRMSGainBeforeSum& operator=(const MixerAlgorithmRMSGainBeforeSum&);
+
+private:
     static const MixerAlgorithmDataElement s_mixerAlgorithmDataElement;
     // 16000 samples per second @ 16khz sampling rate
     // 1ms ~ 16 samples - 64ms ~ 1024 samples

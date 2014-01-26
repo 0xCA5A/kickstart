@@ -8,6 +8,7 @@ class DataElementIndex(object):
     def __init__(self):
         """
         """
+        print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
         self.__wordBucketMap = {}
 
 

@@ -10,7 +10,7 @@ import ManPageTextDataElement
 class LocalManPageImporter(object):
 
     def __init__(self):
-        print "[i] HELLO FROM CLASS %s" % (self.__class__.__name__)
+        print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
 
 
     def __getLocalSystemManPageRecordsList(self):
@@ -19,13 +19,13 @@ class LocalManPageImporter(object):
 
         localSystemManPageRecordList = out.rstrip().rsplit("\n")
 
-        # dev hack
-        print "DEV HACK DEV HACK DEV HACK"
-        outLinesCopy = localSystemManPageRecordList[:]
-        localSystemManPageRecordList = []
-        for line in outLinesCopy:
-            if len(line.split(" ")[0].rstrip()) < 2:
-                localSystemManPageRecordList.append(line)
+        # NOTE(sam): dev hack
+        #print "DEV HACK DEV HACK DEV HACK"
+        #outLinesCopy = localSystemManPageRecordList[:]
+        #localSystemManPageRecordList = []
+        #for line in outLinesCopy:
+            #if len(line.split(" ")[0].rstrip()) < 2:
+                #localSystemManPageRecordList.append(line)
 
         print "[i] %d man pages found on the system" % (len(localSystemManPageRecordList))
         return localSystemManPageRecordList
@@ -34,8 +34,11 @@ class LocalManPageImporter(object):
     def __createManPageTextDataElementsFromManPageRecords(self, manPageRecordList):
         manPageTextDataElemntList = []
 
+        print "[i] %d create man page text data elements..."
+
         # expect someting like this:
         # update-xmlcatalog (8) - maintain XML catalog files
+        record_counter = 0
         for line in manPageRecordList:
 
             # monster hack...
@@ -51,7 +54,9 @@ class LocalManPageImporter(object):
             my_man_page_content_process = subprocess.Popen(['man', manPageName], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             rawTextData, err = my_man_page_content_process.communicate()
 
+            print " * process record %d / %d, add data from origin %s" % (record_counter, len(manPageRecordList), origin.rstrip())
             manPageTextDataElemntList.append(ManPageTextDataElement.ManPageTextDataElement(origin.rstrip(), time.time(), rawTextData.rstrip(), manPageSection, shortDescription))
+            record_counter += 1
 
         return manPageTextDataElemntList
 

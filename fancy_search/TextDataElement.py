@@ -11,6 +11,7 @@ class TextDataElement(object):
     def __init__(self, origin, timestamp, rawTextData):
         """
         """
+        # print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
         self.__origin = origin
         self.__timestamp = timestamp
         self.__rawTextData = rawTextData

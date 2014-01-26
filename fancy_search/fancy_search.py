@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+
 import LocalManPageImporter
 import DataElementIndexer
 import TextDataQuery
+
 
 if __name__ == "__main__":
     """good old main...
@@ -12,22 +14,25 @@ if __name__ == "__main__":
     print "[i] HELLO FROM MAIN"
 
     local_man_page_importer = LocalManPageImporter.LocalManPageImporter()
-    manPageTextDataElemntList = local_man_page_importer.processData()
+    manPageTextDataElementList = local_man_page_importer.processData()
 
     my_data_element_indexer = DataElementIndexer.DataElementIndexer()
-
-    my_data_element_indexer.processData(manPageTextDataElemntList)
+    my_data_element_indexer.processData(manPageTextDataElementList)
     dataElementIndex = my_data_element_indexer.getDataElementIndex()
 
-    my_text_data_query_string = "file type hello beer"
+    print "[i] current number of data buckets in index: %d" % (dataElementIndex.getNumberOfDataBuckets())
+
+    my_text_data_query_string = "file type hello"
     my_textDataQuery = TextDataQuery.TextDataQuery(my_text_data_query_string)
-    textDataElementDict = dataElementIndex.query(my_textDataQuery)
+    textDataElementList = dataElementIndex.query(my_textDataQuery)
 
     print "[i] query result:"
-    for key, value in textDataElementDict.iteritems():
-        print key
-
-        for element in value:
-            print element.getOrigin()
+    for resultElement in textDataElementList:
+        (word, dataElementObjectList) = resultElement
+        print " word: %s found in data objects" % word
+        for dataElementObject in dataElementObjectList:
+            #elementString = "".append("  * %s" % (dataElementObject.getOrigin())
+            print "  * %s - %s (%d hits)" % (dataElementObject.getOrigin(), dataElementObject.getShortDescription(), len(dataElementObject.getPositionDataListByWord(word)))
+            #print elementString
 
     print "[i] LEAVE MAIN"

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+
 import re
+
 
 class TextDataElement(object):
     """simple class to store textual data
@@ -13,41 +15,51 @@ class TextDataElement(object):
         self.__timestamp = timestamp
         self.__rawTextData = rawTextData
 
-
-        self.__filteredTextDataTupleList = self.__filterRawTextData(self.__rawTextData)
+        self.__filteredTextDataTupleDict = self.__filterRawTextData(self.__rawTextData)
 
 
     def __filterRawTextData(self, rawTextData):
-        """TODO
         """
-
-        uppercaseWordRegex = re.compile('[A-Z]')
-        filteredTextDataTupleList = []
-
+        """
+        wordRegex = re.compile('^\w*$', re.IGNORECASE)
         rawWordList = rawTextData.split(" ")
 
-        originalTextDataElementPosition = 0
+        filteredTextDataTupleDict = {}
+        originalTextDataElementPosition = -1
         for word in rawWordList:
             originalTextDataElementPosition += 1
+
+            # remove unwanted symbols
+            re.sub(r'[^\w]', ' ', word)
             word = word.rstrip().upper()
 
             # BUG(sam): fix this in a proper way...
-            if (len(word) < 3):
+            if (len(word) == 0):
                 continue
 
-            # BUG(sam): WORD. is dropped, fix this
-            if uppercaseWordRegex.match(word):
-                filteredTextDataTupleList.append((word, originalTextDataElementPosition))
+            if wordRegex.match(word):
+                if filteredTextDataTupleDict.has_key(word):
+                    filteredTextDataTupleDict[word].append(originalTextDataElementPosition)
+                else:
+                    filteredTextDataTupleDict[word] = [originalTextDataElementPosition]
 
-        return filteredTextDataTupleList
+        return filteredTextDataTupleDict
 
 
     def getOrigin(self):
         return self.__origin
 
 
-    def getFilteredTextDataList(self):
+    def getFilteredTextDataDict(self):
         """simple accessor function
         """
-        return self.__filteredTextDataTupleList
+        return self.__filteredTextDataTupleDict
 
+
+    def getPositionDataListByWord(self, word):
+        """
+        """
+        if self.__filteredTextDataTupleDict.has_key(word):
+            return self.__filteredTextDataTupleDict[word]
+        else:
+            return []

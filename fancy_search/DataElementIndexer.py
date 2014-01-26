@@ -7,16 +7,11 @@ import DataElementIndex
 class DataElementIndexer(object):
     """
     """
+
     def __init__(self):
         """
         """
         self.__dataElementIndex = DataElementIndex.DataElementIndex()
-
-
-    def getNumberOfDataBuckets(self):
-        """
-        """
-        return len(self.__dataElementIndex.getNumberOfDataBuckets())
 
 
     def processData(self, textDataElemntList):
@@ -30,3 +25,9 @@ class DataElementIndexer(object):
         """simple accessor function
         """
         return self.__dataElementIndex
+
+
+    def getNumberOfDataBuckets(self):
+        """simple accessor function
+        """
+        return len(self.__dataElementIndex.getNumberOfDataBuckets())

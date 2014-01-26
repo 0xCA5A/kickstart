@@ -6,10 +6,12 @@ import time
 
 import ManPageTextDataElement
 
+
 class LocalManPageImporter(object):
 
     def __init__(self):
         print "[i] HELLO FROM CLASS %s" % (self.__class__.__name__)
+
 
     def __getLocalSystemManPageRecordsList(self):
         my_man_page_list_process = subprocess.Popen(['man', '-k', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -24,7 +26,6 @@ class LocalManPageImporter(object):
         for line in outLinesCopy:
             if len(line.split(" ")[0].rstrip()) < 2:
                 localSystemManPageRecordList.append(line)
-                #print line
 
         print "[i] %d man pages found on the system" % (len(localSystemManPageRecordList))
         return localSystemManPageRecordList
@@ -36,7 +37,10 @@ class LocalManPageImporter(object):
         # expect someting like this:
         # update-xmlcatalog (8) - maintain XML catalog files
         for line in manPageRecordList:
-            # drop short description
+
+            # monster hack...
+            shortDescription = line.split(")")[1].replace(")", '').strip()[2:]
+
             line = line.split(")")[0]
             manPageName = line.split("(")[0].rstrip()
             manPageSection = line.split("(")[1].rstrip()
@@ -47,7 +51,7 @@ class LocalManPageImporter(object):
             my_man_page_content_process = subprocess.Popen(['man', manPageName], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             rawTextData, err = my_man_page_content_process.communicate()
 
-            manPageTextDataElemntList.append(ManPageTextDataElement.ManPageTextDataElement(origin.rstrip(), time.time(), rawTextData.rstrip(), manPageSection))
+            manPageTextDataElemntList.append(ManPageTextDataElement.ManPageTextDataElement(origin.rstrip(), time.time(), rawTextData.rstrip(), manPageSection, shortDescription))
 
         return manPageTextDataElemntList
 

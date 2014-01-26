@@ -10,6 +10,7 @@ class TextDataQuery(object):
         """
         self.__textDataQueryString = textDataQueryString
 
+
     def getQueryTerms(self):
         """
         """

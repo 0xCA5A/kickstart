@@ -1,15 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-
-import ManPageTextDataElement
 import LocalManPageImporter
-import DataElementIndex
 import DataElementIndexer
 import TextDataQuery
-
-
-
 
 if __name__ == "__main__":
     """good old main...

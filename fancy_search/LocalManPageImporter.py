@@ -18,14 +18,14 @@ class LocalManPageImporter(object):
 
         local_system_man_page_record_list = out.rstrip().split("\n")
 
-        # NOTE(sam): dev hack
-        print "DEV HACK DEV HACK DEV HACK"
-        max_man_page_name_length = 4
-        out_lines_copy = local_system_man_page_record_list[:]
-        local_system_man_page_record_list = []
-        for line in out_lines_copy:
-            if len(line.split(" ")[0].rstrip()) < max_man_page_name_length:
-                local_system_man_page_record_list.append(line)
+        ## NOTE(sam): dev hack
+        #print "DEV HACK DEV HACK DEV HACK"
+        #max_man_page_name_length = 4
+        #out_lines_copy = local_system_man_page_record_list[:]
+        #local_system_man_page_record_list = []
+        #for line in out_lines_copy:
+            #if len(line.split(" ")[0].rstrip()) < max_man_page_name_length:
+                #local_system_man_page_record_list.append(line)
 
         print "[i] %d man pages found on the system" % (len(local_system_man_page_record_list))
         return local_system_man_page_record_list

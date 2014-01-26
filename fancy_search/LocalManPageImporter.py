@@ -12,7 +12,6 @@ class LocalManPageImporter(object):
     def __init__(self):
         print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
 
-
     def __getLocalSystemManPageRecordsList(self):
         my_man_page_list_process = subprocess.Popen(['man', '-k', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = my_man_page_list_process.communicate()
@@ -20,16 +19,16 @@ class LocalManPageImporter(object):
         localSystemManPageRecordList = out.rstrip().rsplit("\n")
 
         # NOTE(sam): dev hack
-        #print "DEV HACK DEV HACK DEV HACK"
-        #outLinesCopy = localSystemManPageRecordList[:]
-        #localSystemManPageRecordList = []
-        #for line in outLinesCopy:
-            #if len(line.split(" ")[0].rstrip()) < 2:
-                #localSystemManPageRecordList.append(line)
+        print "DEV HACK DEV HACK DEV HACK"
+        max_man_page_name_length = 4
+        outLinesCopy = localSystemManPageRecordList[:]
+        localSystemManPageRecordList = []
+        for line in outLinesCopy:
+            if len(line.split(" ")[0].rstrip()) < max_man_page_name_length:
+                localSystemManPageRecordList.append(line)
 
         print "[i] %d man pages found on the system" % (len(localSystemManPageRecordList))
         return localSystemManPageRecordList
-
 
     def __createManPageTextDataElementsFromManPageRecords(self, manPageRecordList):
         manPageTextDataElemntList = []
@@ -60,9 +59,16 @@ class LocalManPageImporter(object):
 
         return manPageTextDataElemntList
 
-
     def processData(self):
         """function to import the man page data
         """
         localSystemManPageRecordList = self.__getLocalSystemManPageRecordsList()
-        return self.__createManPageTextDataElementsFromManPageRecords(localSystemManPageRecordList)
+        manPageTextDataElemntList = self.__createManPageTextDataElementsFromManPageRecords(localSystemManPageRecordList)
+
+        filteredDateWordSum = 0
+        for dateElement in manPageTextDataElemntList:
+            filteredDateWordSum += dateElement.getNrOfFilteredWords()
+
+        print "[i] %d filtered words processed" % filteredDateWordSum
+
+        return manPageTextDataElemntList

@@ -16,8 +16,7 @@ class TextDataElement(object):
         self.__timestamp = timestamp
         self.__rawTextData = rawTextData
 
-        self.__filteredTextDataTupleDict = self.__filterRawTextData(self.__rawTextData)
-
+        self.__filteredTextDataDict = self.__filterRawTextData(self.__rawTextData)
 
     def __filterRawTextData(self, rawTextData):
         """
@@ -39,28 +38,28 @@ class TextDataElement(object):
                 continue
 
             if wordRegex.match(word):
-                if filteredTextDataTupleDict.has_key(word):
+                if word in filteredTextDataTupleDict:
                     filteredTextDataTupleDict[word].append(originalTextDataElementPosition)
                 else:
                     filteredTextDataTupleDict[word] = [originalTextDataElementPosition]
 
         return filteredTextDataTupleDict
 
-
     def getOrigin(self):
         return self.__origin
-
 
     def getFilteredTextDataDict(self):
         """simple accessor function
         """
-        return self.__filteredTextDataTupleDict
+        return self.__filteredTextDataDict
 
+    def getNrOfFilteredWords(self):
+        return len(self.__filteredTextDataDict)
 
     def getPositionDataListByWord(self, word):
         """
         """
-        if self.__filteredTextDataTupleDict.has_key(word):
-            return self.__filteredTextDataTupleDict[word]
+        if word in self.__filteredTextDataDict:
+            return self.__filteredTextDataDict[word]
         else:
             return []

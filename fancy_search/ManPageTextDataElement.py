@@ -13,7 +13,6 @@ class ManPageTextDataElement(TextDataElement.TextDataElement):
         self.__manPageSection = manPageSection
         self.__shortDescription = shortDescription
 
-
     def getManPageSection(self):
         return self.__manPageSection
 

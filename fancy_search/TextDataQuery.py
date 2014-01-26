@@ -11,7 +11,6 @@ class TextDataQuery(object):
         print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
         self.__textDataQueryString = textDataQueryString
 
-
     def getQueryTerms(self):
         """
         """

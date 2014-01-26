@@ -18,7 +18,7 @@ if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(sys.argv[1:], "l:s:", ["load=", "store="])
     except getopt.GetoptError:
-        "[MAIN] bad user input, check command line"
+        print "[MAIN] bad user input, check command line"
         sys.exit(2)
 
     load_index_dump_file_flag = False
@@ -66,13 +66,13 @@ if __name__ == "__main__":
 
     my_text_data_query_string = "gcc hello guido world"
     my_text_data_query = TextDataQuery.TextDataQuery(my_text_data_query_string)
-    print "[MAIN] start query %s" % (my_text_data_query_string)
+    print "[MAIN] start query: %s" % (my_text_data_query_string)
     text_data_element_list = data_element_index.query(my_text_data_query)
 
     print "[MAIN] query result:"
     for result_element in text_data_element_list:
         (word, data_element_object_list) = result_element
-        print " word: %s found in data objects" % word
+        print " word %s found in data objects" % word
         for data_element_object in data_element_object_list:
             print "  * %s - %s (hit count: %d)" % (data_element_object.get_origin(), data_element_object.get_short_description(), len(data_element_object.get_position_data_list_by_word(word)))
 

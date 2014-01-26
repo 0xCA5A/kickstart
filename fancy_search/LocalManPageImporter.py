@@ -33,7 +33,7 @@ class LocalManPageImporter(object):
     def __create_man_page_text_data_elements_from_man_page_records(self, man_page_record_list):
         man_page_text_data_elemnt_list = []
 
-        print "[i] %d create man page text data elements..."
+        print "[i] create man page text data elements..."
 
         # expect someting like this:
         # update-xmlcatalog (8) - maintain XML catalog files

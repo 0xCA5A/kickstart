@@ -12,63 +12,63 @@ class LocalManPageImporter(object):
     def __init__(self):
         print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
 
-    def __getLocalSystemManPageRecordsList(self):
+    def __get_local_system_man_page_records_list(self):
         my_man_page_list_process = subprocess.Popen(['man', '-k', '.'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = my_man_page_list_process.communicate()
 
-        localSystemManPageRecordList = out.rstrip().rsplit("\n")
+        local_system_man_page_record_list = out.rstrip().split("\n")
 
         # NOTE(sam): dev hack
         print "DEV HACK DEV HACK DEV HACK"
         max_man_page_name_length = 4
-        outLinesCopy = localSystemManPageRecordList[:]
-        localSystemManPageRecordList = []
-        for line in outLinesCopy:
+        out_lines_copy = local_system_man_page_record_list[:]
+        local_system_man_page_record_list = []
+        for line in out_lines_copy:
             if len(line.split(" ")[0].rstrip()) < max_man_page_name_length:
-                localSystemManPageRecordList.append(line)
+                local_system_man_page_record_list.append(line)
 
-        print "[i] %d man pages found on the system" % (len(localSystemManPageRecordList))
-        return localSystemManPageRecordList
+        print "[i] %d man pages found on the system" % (len(local_system_man_page_record_list))
+        return local_system_man_page_record_list
 
-    def __createManPageTextDataElementsFromManPageRecords(self, manPageRecordList):
-        manPageTextDataElemntList = []
+    def __create_man_page_text_data_elements_from_man_page_records(self, man_page_record_list):
+        man_page_text_data_elemnt_list = []
 
         print "[i] %d create man page text data elements..."
 
         # expect someting like this:
         # update-xmlcatalog (8) - maintain XML catalog files
         record_counter = 0
-        for line in manPageRecordList:
+        for line in man_page_record_list:
 
             # monster hack...
-            shortDescription = line.split(")")[1].replace(")", '').strip()[2:]
+            short_description = line.split(")")[1].replace(")", '').strip()[2:]
 
             line = line.split(")")[0]
-            manPageName = line.split("(")[0].rstrip()
-            manPageSection = line.split("(")[1].rstrip()
+            man_page_name = line.split("(")[0].rstrip()
+            man_page_section = line.split("(")[1].rstrip()
 
-            my_man_page_location_process = subprocess.Popen(['man', '--location', manPageName], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            my_man_page_location_process = subprocess.Popen(['man', '--location', man_page_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             origin, err = my_man_page_location_process.communicate()
 
-            my_man_page_content_process = subprocess.Popen(['man', manPageName], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            rawTextData, err = my_man_page_content_process.communicate()
+            my_man_page_content_process = subprocess.Popen(['man', man_page_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            raw_text_data, err = my_man_page_content_process.communicate()
 
-            print " * process record %d / %d, add data from origin %s" % (record_counter, len(manPageRecordList), origin.rstrip())
-            manPageTextDataElemntList.append(ManPageTextDataElement.ManPageTextDataElement(origin.rstrip(), time.time(), rawTextData.rstrip(), manPageSection, shortDescription))
+            print " * process record %d / %d, add data from origin %s" % (record_counter, len(man_page_record_list), origin.rstrip())
+            man_page_text_data_elemnt_list.append(ManPageTextDataElement.ManPageTextDataElement(origin.rstrip(), time.time(), raw_text_data.rstrip(), man_page_section, short_description))
             record_counter += 1
 
-        return manPageTextDataElemntList
+        return man_page_text_data_elemnt_list
 
-    def processData(self):
+    def process_data(self):
         """function to import the man page data
         """
-        localSystemManPageRecordList = self.__getLocalSystemManPageRecordsList()
-        manPageTextDataElemntList = self.__createManPageTextDataElementsFromManPageRecords(localSystemManPageRecordList)
+        local_system_man_page_record_list = self.__get_local_system_man_page_records_list()
+        man_page_text_data_elemnt_list = self.__create_man_page_text_data_elements_from_man_page_records(local_system_man_page_record_list)
 
-        filteredDateWordSum = 0
-        for dateElement in manPageTextDataElemntList:
-            filteredDateWordSum += dateElement.getNrOfFilteredWords()
+        filtered_data_word_sum = 0
+        for data_element in man_page_text_data_elemnt_list:
+            filtered_data_word_sum += data_element.get_nr_of_filtered_words()
 
-        print "[i] %d filtered words processed" % filteredDateWordSum
+        print "[i] %d filtered words processed" % filtered_data_word_sum
 
-        return manPageTextDataElemntList
+        return man_page_text_data_elemnt_list

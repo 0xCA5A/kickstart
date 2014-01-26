@@ -14,38 +14,26 @@ if __name__ == "__main__":
 
     local_man_page_importer = LocalManPageImporter.LocalManPageImporter()
     print "[MAIN] start local man page importer..."
-    manPageTextDataElementList = local_man_page_importer.processData()
+    man_page_text_data_element_list = local_man_page_importer.process_data()
 
     my_data_element_indexer = DataElementIndexer.DataElementIndexer()
 
     print "[MAIN] start indexer..."
-    my_data_element_indexer.processData(manPageTextDataElementList)
-    dataElementIndex = my_data_element_indexer.getDataElementIndex()
+    my_data_element_indexer.process_data(man_page_text_data_element_list)
+    data_element_index = my_data_element_indexer.get_data_element_index()
 
-    print "[MAIN] current number of data buckets in index: %d" % (dataElementIndex.getNumberOfDataBuckets())
+    print "[MAIN] current number of data buckets in index: %d" % (data_element_index.get_number_of_data_buckets())
 
-    my_text_data_query_string = "file type hello"
-    my_textDataQuery = TextDataQuery.TextDataQuery(my_text_data_query_string)
+    my_text_data_query_string = "gcc hello guido"
+    my_text_data_query = TextDataQuery.TextDataQuery(my_text_data_query_string)
     print "[MAIN] start query %s" % (my_text_data_query_string)
-    textDataElementList = dataElementIndex.query(my_textDataQuery)
+    text_data_element_list = data_element_index.query(my_text_data_query)
 
     print "[MAIN] query result:"
-    for resultElement in textDataElementList:
-        (word, dataElementObjectList) = resultElement
+    for result_element in text_data_element_list:
+        (word, data_element_object_list) = result_element
         print " word: %s found in data objects" % word
-        for dataElementObject in dataElementObjectList:
-            print "  * %s - %s (hit count: %d)" % (dataElementObject.getOrigin(), dataElementObject.getShortDescription(), len(dataElementObject.getPositionDataListByWord(word)))
-
-    my_text_data_query_string = "gcc optimization optimisation make"
-    my_textDataQuery = TextDataQuery.TextDataQuery(my_text_data_query_string)
-    print "[MAIN] start query: %s" % (my_text_data_query_string)
-    textDataElementList = dataElementIndex.query(my_textDataQuery)
-
-    print "[MAIN] query result:"
-    for resultElement in textDataElementList:
-        (word, dataElementObjectList) = resultElement
-        print " word: %s found in data objects" % word
-        for dataElementObject in dataElementObjectList:
-            print "  * %s - %s (%d hits)" % (dataElementObject.getOrigin(), dataElementObject.getShortDescription(), len(dataElementObject.getPositionDataListByWord(word)))
+        for data_element_object in data_element_object_list:
+            print "  * %s - %s (hit count: %d)" % (data_element_object.get_origin(), data_element_object.get_short_description(), len(data_element_object.get_position_data_list_by_word(word)))
 
     print "[MAIN] LEAVE MAIN"

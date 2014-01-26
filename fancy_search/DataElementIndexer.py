@@ -12,20 +12,20 @@ class DataElementIndexer(object):
         """
         """
         print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
-        self.__dataElementIndex = DataElementIndex.DataElementIndex()
+        self.__data_element_index = DataElementIndex.DataElementIndex()
 
-    def processData(self, textDataElemntList):
+    def process_data(self, text_data_elemnt_list):
         """add data to index
         """
-        for textDataElement in textDataElemntList:
-            self.__dataElementIndex.insertTextDataElement(textDataElement)
+        for text_data_element in text_data_elemnt_list:
+            self.__data_element_index.insert_text_data_element(text_data_element)
 
-    def getDataElementIndex(self):
+    def get_data_element_index(self):
         """simple member accessor function
         """
-        return self.__dataElementIndex
+        return self.__data_element_index
 
-    def getNumberOfDataBuckets(self):
+    def get_number_of_data_buckets(self):
         """simple member accessor function
         """
-        return len(self.__dataElementIndex.getNumberOfDataBuckets())
+        return len(self.__data_element_index.get_number_of_data_buckets())

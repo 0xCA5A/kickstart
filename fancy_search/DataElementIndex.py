@@ -9,29 +9,28 @@ class DataElementIndex(object):
         """
         """
         print "[i] HELLO FROM OBJECT %s" % (self.__class__.__name__)
-        self.__wordBucketMap = {}
+        self.__word_bucket_map = {}
 
-    def query(self, textDataQuery):
+    def query(self, text_data_query):
         """simple query to the index
         """
-        queryTermList = textDataQuery.getQueryTerms()
+        query_term_list = text_data_query.get_query_terms()
 
-        resultTextDataElementList = []
-        for queryTerm in queryTermList:
-            if queryTerm in self.__wordBucketMap:
-                resultTextDataElementList.append((queryTerm, self.__wordBucketMap[queryTerm]))
+        result_text_data_element_list = []
+        for query_term in query_term_list:
+            if query_term in self.__word_bucket_map:
+                result_text_data_element_list.append((query_term, self.__word_bucket_map[query_term]))
 
-        return resultTextDataElementList
+        return result_text_data_element_list
 
-    def getNumberOfDataBuckets(self):
-        return len(self.__wordBucketMap)
+    def get_number_of_data_buckets(self):
+        return len(self.__word_bucket_map)
 
-    def insertTextDataElement(self, textDataElement):
+    def insert_text_data_element(self, text_data_element):
         """
         """
-        for word, positionList in textDataElement.getFilteredTextDataDict().iteritems():
-            #TODO(sam): do this with a second map
-            if word in self.__wordBucketMap:
-                self.__wordBucketMap[word].append(textDataElement)
+        for word, positionList in text_data_element.get_filtered_text_data_dict().iteritems():
+            if word in self.__word_bucket_map:
+                self.__word_bucket_map[word].append(text_data_element)
             else:
-                self.__wordBucketMap[word] = [textDataElement]
+                self.__word_bucket_map[word] = [text_data_element]

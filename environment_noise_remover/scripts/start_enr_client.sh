@@ -4,22 +4,19 @@
 ################################################################################
 # defines
 ################################################################################
-JACK_AUDIO_DEVICE_INDEX=0
-JACK_SAMPLING_RATE=16000
-JACK_NPERIODS=2
-JACK_PERIOD=160
-JACK_CHANNELS=2
-JACK_INCHANNELS=${JACK_CHANNELS}
-JACK_OUTCHANNELS=${JACK_CHANNELS}
 ################################################################################
 
 
 ################################################################################
 # main
 ################################################################################
+if [ $(ps aux | grep enr_jack_client | grep -v grep | wc -l) -ge 1 ]; then
+    echo -e "[i] remove already started enr_jack_client..."
+    killall enr_jack_client
+fi
+
 echo -e "[i] start enr_jack_client as deamon..."
 ../src/enr_jack_client &
-
 
 sleep 1
 echo -e "[i] current jack connections"

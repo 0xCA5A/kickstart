@@ -109,6 +109,9 @@ int main (int argc, char *argv[])
     if (jack_connect(client, input_ports[0], jack_port_name(mic_in_port))) {
             fprintf (stderr, "cannot connect input port\n");
     }
+    if (jack_connect(client, input_ports[1], jack_port_name(mic_in_port))) {
+            fprintf (stderr, "cannot connect input port\n");
+    }
 
     free (input_ports);
 
@@ -122,6 +125,9 @@ int main (int argc, char *argv[])
     }
 
     if (jack_connect(client, jack_port_name(line_out_port), output_ports[0])) {
+            fprintf(stderr, "cannot connect output ports\n");
+    }
+    if (jack_connect(client, jack_port_name(line_out_port), output_ports[1])) {
             fprintf(stderr, "cannot connect output ports\n");
     }
 

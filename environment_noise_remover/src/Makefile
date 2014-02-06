@@ -2,17 +2,17 @@
 
 OBJ_FILES := enr_jack_client.o
 HEADER_FILES := $(wildcard *.h)
-CFLAGS += -Wall -O2 -march=armv7-a -mfpu=neon
+
+CFLAGS += -mcpu=cortex-a9 --mfpu=neon-vfpv3 -O3 -Wall -std=gnu99
 LDFLAGS +=-ljack
 APP_BINARY := enr_jack_client
 
 
-
 all: $(OBJ_FILES) $(HEADER_FILES)
-	g++ $(CPPFLAGS) -o $(APP_BINARY) $(OBJ_FILES) $(LDFLAGS)
+	gcc $(CFLAGS) -o $(APP_BINARY) $(OBJ_FILES) $(LDFLAGS)
 
-%.o: %.cpp $(HEADER_FILES)
-	g++ -c $(CPPFLAGS) -o $@ $<
+# %.o: %.c $(HEADER_FILES)
+# 	gcc -c $(CFLAGS) -o $@ $<
 
 clean:
 	rm -f *.o

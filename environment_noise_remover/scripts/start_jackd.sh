@@ -36,13 +36,16 @@ echo -e "[i] start jackd..."
 echo -e "[i] server playback latency: $(( ${JACK_NPERIODS} * ${JACK_PERIOD} * 1000 / ${JACK_SAMPLING_RATE} ))ms"
 echo -e "[i] data chunk length: $(( 1000 / ( ${JACK_SAMPLING_RATE} / ${JACK_PERIOD} ) ))ms"
 
+echo -e "[i] cpu speed: $(cat /proc/cpuinfo | grep -i BOGO | uniq)"
+
+
 COMMAND="/usr/bin/jackd --no-mlock --realtime --realtime-priority 99 \
 --port-max 32 --clock-source s --driver alsa \
 --capture hw:${JACK_AUDIO_DEVICE_INDEX} --device hw:${JACK_AUDIO_DEVICE_INDEX} \
 --duplex --inchannels ${JACK_INCHANNELS} --nperiods ${JACK_NPERIODS} \
 --outchannels ${JACK_OUTCHANNELS} --playback hw:${JACK_AUDIO_DEVICE_INDEX} \
 --period ${JACK_PERIOD} --rate ${JACK_SAMPLING_RATE} \
---shorts ${OUTPUT_MODE} /tmp/jack_server.log ${DAEMON_MODE}"
+${OUTPUT_MODE} /tmp/jack_server.log ${DAEMON_MODE}"
 
 eval ${COMMAND}
 

@@ -19,13 +19,21 @@ int process_callback(jack_nframes_t nframes, void *arg) {
     jack_default_audio_sample_t* line_out_audio_samples;
     jack_default_audio_sample_t* mic_in_audio_samples;
 
-    //get output audio buffer
+    // get output audio buffer
     line_out_audio_samples = jack_port_get_buffer(line_out_port, nframes);
 
-    //get input audio buffer
+    // get input audio buffer
     mic_in_audio_samples = jack_port_get_buffer(mic_in_port, nframes);
 
+    // copy frames aka samples
     memcpy(line_out_audio_samples, mic_in_audio_samples, nframes * sizeof(jack_default_audio_sample_t));
+
+    // simpe invert
+    for (uint32_t sample_index = 0; sample_index < nframes; sample_index++) {
+        line_out_audio_samples[sample_index] = -1 * line_out_audio_samples[sample_index] * 5;
+    }
+
+
 
     return 0;
 }
@@ -41,7 +49,7 @@ void jack_shutdown_callback (void *arg)
 int main (int argc, char *argv[])
 {
     const char *client_name = "enr";
-    jack_options_t options = JackNullOption;
+    jack_options_t options = JackNoStartServer;
     const char *server_name = NULL;
 
     // open a client connection to the JACK server
@@ -98,7 +106,7 @@ int main (int argc, char *argv[])
     }
 
 
-    //connect input port
+    // connect input port
     const char **input_ports = jack_get_ports(client, NULL, NULL,
                             JackPortIsPhysical|JackPortIsOutput);
     if (input_ports == NULL) {
@@ -106,6 +114,7 @@ int main (int argc, char *argv[])
             exit (1);
     }
 
+    // two channels
     if (jack_connect(client, input_ports[0], jack_port_name(mic_in_port))) {
             fprintf (stderr, "cannot connect input port\n");
     }
@@ -124,6 +133,7 @@ int main (int argc, char *argv[])
             exit (1);
     }
 
+    // two channels
     if (jack_connect(client, jack_port_name(line_out_port), output_ports[0])) {
             fprintf(stderr, "cannot connect output ports\n");
     }
@@ -133,10 +143,7 @@ int main (int argc, char *argv[])
 
     free (output_ports);
 
-    
 
-
-    
     // keep running until stopped by the user
     sleep (-1);
 

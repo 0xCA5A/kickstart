@@ -33,6 +33,12 @@ after a little configuration i got the system running with a playback latency of
 this has to be optimized later...
 
 
+jack enr client
+---------------
+the first simple implementation (playout inverted mic in signal) did not work at all, ~ was a little optimistic...
+
+
+
 [0]
 http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=i.MX6Q
 

@@ -28,12 +28,11 @@ int process_callback(jack_nframes_t nframes, void *arg) {
     // copy frames aka samples
     memcpy(line_out_audio_samples, mic_in_audio_samples, nframes * sizeof(jack_default_audio_sample_t));
 
-    // simpe invert
+    // first try: simpe invert
+    // seems as we are too slow with the current jack server latency...
     for (uint32_t sample_index = 0; sample_index < nframes; sample_index++) {
-        line_out_audio_samples[sample_index] = -1 * line_out_audio_samples[sample_index] * 5;
+        line_out_audio_samples[sample_index] = -1 * line_out_audio_samples[sample_index] * 4;
     }
-
-
 
     return 0;
 }

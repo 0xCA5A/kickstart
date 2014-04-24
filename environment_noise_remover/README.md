@@ -4,12 +4,11 @@ the long way to my environment noise remover...
 hardware
 --------
 wandboard, freesace i.mx6 [0] quad core
-
-audio codec is a freesace SGTL5000 [1]
+* audio codec is a freesace SGTL5000 [1]
 
 ubuntu 12.04 sd card image is ready [2]. it's armel, but anyway... we have four cores...
 
-the "reference implementation" i have is a BOSE QuietComfort 15 [3], and these guys did a really great job! 
+the "reference implementation" i have is a BOSE QuietComfort 15 [3]. the BOSE guys did a really great job! 
 
 
 jackd

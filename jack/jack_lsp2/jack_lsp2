@@ -1,0 +1,76 @@
+#!/bin/bash
+
+
+################################################################################
+# variable
+################################################################################
+
+_TMP_JACK_LSP_FILE_NAME="/tmp/$0_$$.tmp"
+_TARGET_URI=
+
+################################################################################
+
+
+################################################################################
+# functions
+################################################################################
+
+function print_howto_and_exit {
+    echo -e "[$0] how to:"
+    echo -e "$0 user@host"
+    exit 1
+}
+
+function clean_up {
+    echo -e "[$0] clean up"
+    rm -v -f ${_TMP_JACK_LSP_FILE_NAME}
+}
+
+################################################################################
+
+
+
+
+################################################################################
+# main
+################################################################################
+
+echo -e "[$0] register traps"
+trap 'clean_up; exit 1' TERM INT
+
+echo -e "[$0] system configuration"
+if [ ! -f $(which python) ]; then
+    echo -e "[!] python not found"
+    exit 2
+fi
+
+echo -e "[$0] check arguments"
+if [ $# -ne 1 ]; then
+    echo -e "[!] need a argument"
+    print_howto_and_exit
+fi
+_TARGET_URI=$1
+
+_HOST=$(echo ${_TARGET_URI} | cut -d '@' -f 2)
+echo -e "[$0] check host ${_HOST}"
+ping -w 1 -c 1 ${_HOST} > /dev/null
+if [ $? -ne 0 ]; then
+    echo -e "[!] host ${_HOST} does not response to ping request"
+    exit 3
+fi
+
+echo -e "[$0] get jack lsp information on remote host ${_TARGET_URI}"
+# ssh ${_TARGET_URI} 'jack_lsp -c -p' > ${_TMP_JACK_LSP_FILE_NAME}
+
+# debug stuff
+touch dummy.file
+cp dummy.file ${_TMP_JACK_LSP_FILE_NAME}
+
+echo -e "[$0] start jack lsp parser"
+./jack_lsp_parser.py -f ${_TMP_JACK_LSP_FILE_NAME}
+
+clean_up
+
+echo -e "[$0] exit"
+
+################################################################################

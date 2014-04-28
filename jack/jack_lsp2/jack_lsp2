@@ -63,11 +63,12 @@ echo -e "[$0] get jack lsp information on remote host ${_TARGET_URI}"
 # ssh ${_TARGET_URI} 'jack_lsp -c -p' > ${_TMP_JACK_LSP_FILE_NAME}
 
 # debug stuff
-touch dummy.file
+# touch dummy.file
+echo -e "[$0] DEBUG: copy dummy file"
 cp dummy.file ${_TMP_JACK_LSP_FILE_NAME}
 
 echo -e "[$0] start jack lsp parser"
-./jack_lsp_parser.py -f ${_TMP_JACK_LSP_FILE_NAME}
+$(which python) jack_lsp_parser.py -f ${_TMP_JACK_LSP_FILE_NAME}
 
 clean_up
 

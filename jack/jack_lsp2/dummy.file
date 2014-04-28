@@ -1,0 +1,34 @@
+system:capture_1
+   bf:near_mic_1
+    properties: output,physical,terminal,
+system:capture_2
+   bf:near_mic_2
+    properties: output,physical,terminal,
+system:playback_1
+   aec:near_rx
+    properties: input,physical,terminal,
+system:playback_2
+    properties: input,physical,terminal,
+bf:tx
+   aec:near_tx
+    properties: output,
+bf:near_mic_1
+   system:capture_1
+    properties: input,
+bf:near_mic_2
+   system:capture_2
+    properties: input,
+aec:near_rx
+   system:playback_1
+    properties: output,
+aec:far_tx
+    properties: output,
+aec:near_tx
+   bf:tx
+    properties: input,
+aec:far_rx
+    properties: input,
+sml2:capture_in
+    properties: input,
+sml2:playback_out
+    properties: output,

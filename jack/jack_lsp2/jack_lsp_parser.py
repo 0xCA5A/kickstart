@@ -17,7 +17,7 @@ class JackClient(object):
         return self.__output_port_list
 
 
-class JackLspParser(object):
+class JackLspPCParser(object):
 
     def __init__(self):
         print "[i] hello from %s object" % (self.__class__.__name__)
@@ -58,8 +58,8 @@ if __name__ == "__main__":
         print "[!] need a file, exit immediately"
         sys.exit(1)
 
-    jack_lsp_parser = JackLspParser()
-    jack_lsp_parser.parse(_file_name)
+    jack_lsppc_parser = JackLspPCParser()
+    jack_lsppc_parser.parse(_file_name)
 
 
     print "[%s] exit" % (_application_name)

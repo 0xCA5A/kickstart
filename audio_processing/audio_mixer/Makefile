@@ -16,6 +16,7 @@ all: $(OBJ_FILES) $(HEADER_FILES)
 
 clean:
 	rm -f *.o
+	rm -f *.*~
 	rm -f $(APP_BINARY)
 	rm doc/html -rf
 	

@@ -1,0 +1,27 @@
+
+= the audio analyzer jack client =
+running fft over the audio samples in real time, output on command line
+
+= the devocalizer jack client =
+source: Sing-a-Long Song Devocalizer - make magazine, makezing.com/projects/39 
+idea: When songs are mixed from individual tracks,
+the waveforms of the isolated instruments and voices are added together to from the left and the right channel of the
+stereo mix. Typically, vocal tracks are placed in the center of the mix. which results in mathematically identical waveforms being sent to the left and
+the right channels.
+
+Each stereo channel is added to an inverse copy of the opposite channel, canceling any audio that's mixed in both channels.
+Result: Vocals magically vanish!
+~ 20% of the songs have fantastic vocal cancellation
+50% - 60% of the songs, the effect is less pronounced but you still hear instrumental parts you never heard before
+About 15% are duds, and 5% have a fantastic, totally unexpected, robotic audio sound that's difficult to describe.
+
+
+= build =
+* ./autogen.sh
+* ./configure
+* make
+
+= run jack client =
+* run the jack server on your target
+* move the binaries to your target
+* run the jack client on your target

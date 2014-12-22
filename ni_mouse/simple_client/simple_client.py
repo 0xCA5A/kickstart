@@ -14,18 +14,18 @@ sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 
 #connect the socket to the port where the server is listening
 server_address = MY_UNIX_DOMAIN_SOCKET_NAME
-print '[i] connecting to %s' % server_address
+print '[INFO] connecting to %s' % server_address
 
 try:
     sock.connect(server_address)
 except socket.error, msg:
-    print '[!] ' +  repr(msg)
+    print '[INFO] ' +  repr(msg)
     sys.exit(1)
 
 
-print "[i] wait...."
+print "[INFO] wait...."
 #time.sleep(5)
-print "[i] go!"
+print "[INFO] go!"
 
 
 for i in range(1, NR_OF_MOVEMENTS):
@@ -60,7 +60,7 @@ for i in range(1, NR_OF_MOVEMENTS):
         else:
             message = '{ "dxPos": %d, "dyPos": %d, "key1pressed": %s , "key2pressed": false }' % (dx_sign, dy_sign, key1pressed)
 
-        print 'sending: %s' % message
+        print '[INFO] sending: %s' % message
         sock.sendall(message)
         #sock.send(message)
 
@@ -68,10 +68,13 @@ for i in range(1, NR_OF_MOVEMENTS):
 
         #raw_input('[i] enter to continue... ')
 
-        time.sleep(0.2)
-        if (i % 35 == 0):
-            time.sleep(1)
+        #time.sleep(0.1)
+        if (i % 2 == 0):
+            time.sleep(0.1)
 
+    except KeyboardInterrupt:
+        print "[INFO] caught keyboard interrupt!"
+        raise
 
     except:
-        print "oooops, caught an error... "
+        print "[INFO] oooops, caught an error... "

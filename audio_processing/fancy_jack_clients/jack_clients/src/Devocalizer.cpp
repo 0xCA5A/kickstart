@@ -49,6 +49,10 @@ int Devocalizer::processJackCallback(jack_nframes_t nFrames, void* arg)
 
 
 
+    // http://makezine.com/projects/make-39/song-devocalizer/
+    // use opposite channel as the new ground
+    // each stereo channel is added to a inverse copy of the opposite channel
+
     // process audio samples
     for (uint32_t i = 0; i < nFrames; i++) {
 

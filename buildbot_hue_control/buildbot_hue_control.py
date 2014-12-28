@@ -46,9 +46,6 @@ Options:
 
     http://anotherpythonprogrammer.blogspot.de/2013/05/pyhue-python-library-for-philips-hue.html
 
-    SOURCE:
-    https://github.com/studioimaginaire/phue
-
 
     may: fix address for this hue guy??
 
@@ -65,16 +62,12 @@ import pprint
 import collections
 
 
-DEFAULT_HUE_BRIDGE_ADDRESS_STRING = '192.168.1.123'
-DEFAULT_LOG_LEVEL = logging.INFO
-DEFAULT_HUE_USERNAME = 'developer'
 
 
 def main(_cli_arguments):
 
     print "debug"
     pprint.pprint(_cli_arguments)
-
 
     _list_supported_colors = _cli_arguments['--list-colors']
     if _list_supported_colors:
@@ -94,9 +87,9 @@ def main(_cli_arguments):
     if _cli_arguments['--debug']:
         _debug = True
 
-    _bridge_address = DEFAULT_HUE_BRIDGE_ADDRESS_STRING
-    if _cli_arguments['--address'] is not None:
-        _bridge_address = _cli_arguments['--address']
+    _bridge_address = _cli_arguments['--address']
+    # if _cli_arguments['--address'] is not None:
+    #     _bridge_address = _cli_arguments['--address']
 
     bb_hue_control = BuildBotHUEControl(_debug=_debug, _bridge_address=_bridge_address)
 
@@ -120,39 +113,54 @@ def main(_cli_arguments):
         bb_hue_control.set_bulb_color(_bulb_name, _set_color)
         sys.exit(0)
 
-
+def _exit_gracefully():
+    sys.exit(0)
 
 
 class BuildBotHUEControl(object):
-    """
+    """simple interface to control a philips HUE from the command line
+
+    this implementation uses the phue module to handle the HUE REST API calls
+        https://github.com/studioimaginaire/phue
+
+    there are a lot of libs available, check here for more detail:
+        https://github.com/Q42/hue-libs
 
     """
+
+    DEFAULT_HUE_BRIDGE_ADDRESS_STRING = '192.168.1.123'
+    DEFAULT_LOG_LEVEL = logging.INFO
+    DEFAULT_HUE_USERNAME = 'developer'
 
     Color = collections.namedtuple('Color', 'name, rgb_value')
 
-    def __init__(self, _bulb_name=None, _debug=False, _bridge_address="192.168.1.51", _user_name=DEFAULT_HUE_USERNAME):
+    def __init__(self, _bulb_name=None, _debug=False,
+                 _bridge_address=DEFAULT_HUE_BRIDGE_ADDRESS_STRING,
+                 _user_name=DEFAULT_HUE_USERNAME,
+                 _log_level=DEFAULT_LOG_LEVEL):
+
         self._bulb_name = _bulb_name
         self._bridge_address = _bridge_address
 
         self._hue_bridge = phue.Bridge(_bridge_address, _user_name)
 
         logging.basicConfig()
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
-        # define and register the supported colors
+        # define and register the supported colors in RGB representation
         self._colors = []
+        self._colors.append(self.Color('white', (255, 255, 255)))
         self._colors.append(self.Color('red', (255, 0, 0)))
         self._colors.append(self.Color('green', (0, 255, 0)))
         self._colors.append(self.Color('blue', (0, 0, 255)))
-        self._colors.append(self.Color('magenta', (255, 0, 255)))
         self._colors.append(self.Color('cyan', (0, 255, 255)))
+        self._colors.append(self.Color('magenta', (255, 0, 255)))
         self._colors.append(self.Color('yellow', (255, 255, 0)))
-        self._colors.append(self.Color('white', (255, 255, 255)))
 
         if _debug:
             self._logger.setLevel(logging.DEBUG)
         else:
-            self._logger.setLevel(DEFAULT_LOG_LEVEL)
+            self._logger.setLevel(_log_level)
 
 
     def list_supported_colors(self):
@@ -169,10 +177,39 @@ class BuildBotHUEControl(object):
         else:
             self._logger.error("color %s unknown, exit immediately" % _color)
 
+
+        # TODO(casasam): this seems to be better, check this lib
+
         #
         # colorsys.rgb_to_hls(r, g, b)
         #
         #     Convert the color from RGB coordinates to HLS coordinates.
+
+        # check this stuff, https://github.com/issackelly/python-hue/blob/master/hue.py
+        #  def rgb(self, red, green=None, blue=None, transitiontime=5):
+        # if isinstance(red, basestring):
+        # # assume a hex string is passed
+        # rstring = red
+        # red = int(rstring[1:3], 16)
+        # green = int(rstring[3:5], 16)
+        # blue = int(rstring[5:], 16)
+        # print red, green, blue
+        # # We need to convert the RGB value to Yxy.
+        # redScale = float(red) / 255.0
+        # greenScale = float(green) / 255.0
+        # blueScale = float(blue) / 255.0
+        # colormodels.init(
+        # phosphor_red=colormodels.xyz_color(0.64843, 0.33086),
+        # phosphor_green=colormodels.xyz_color(0.4091, 0.518),
+        # phosphor_blue=colormodels.xyz_color(0.167, 0.04))
+        # logger.debug(redScale, greenScale, blueScale)
+        # xyz = colormodels.irgb_color(red, green, blue)
+        # logger.debug(xyz)
+        # xyz = colormodels.xyz_from_rgb(xyz)
+        # logger.debug(xyz)
+        # xyz = colormodels.xyz_normalize(xyz)
+        # logger.debug(xyz)
+
 
     def connect_application(self):
         self._logger.info("connect application to bridge")

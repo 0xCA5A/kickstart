@@ -3,10 +3,10 @@
 """Simple pyhue wrapper to easily change the color a bulb identified by its name
 
 Usage:
-    buildbot_hue_control.py --bulb=NAME (--set-color=COLOR | --turn-off) [--address=ADDRESS] [--log=LEVEL]
-    buildbot_hue_control.py --connect [--log=LEVEL]
-    buildbot_hue_control.py --list-bulbs [--address=ADDRESS] [--log=LEVEL]
-    buildbot_hue_control.py --list-colors [--log=LEVEL]
+    minimal_hue_control.py --bulb=NAME (--set-color=COLOR | --turn-off) [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py --connect [--log=LEVEL]
+    minimal_hue_control.py --list-bulbs [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py --list-colors [--log=LEVEL]
 
 
 Options:
@@ -81,13 +81,13 @@ def _main(_cli_arguments):
 
     _list_supported_colors = _cli_arguments['--list-colors']
     if _list_supported_colors:
-        bb_hue_control = BuildBotHUEControl()
+        bb_hue_control = MinimalHUEControl()
         bb_hue_control.list_supported_colors()
         _exit_gracefully()
 
     _list_known_bubls = _cli_arguments['--list-bulbs']
     if _list_known_bubls:
-        bb_hue_control = BuildBotHUEControl()
+        bb_hue_control = MinimalHUEControl()
         bb_hue_control.list_known_bulbs()
         _exit_gracefully()
 
@@ -101,7 +101,7 @@ def _main(_cli_arguments):
     # if _cli_arguments['--address'] is not None:
     #     _bridge_address = _cli_arguments['--address']
 
-    bb_hue_control = BuildBotHUEControl(_bridge_address=_bridge_address)
+    bb_hue_control = MinimalHUEControl(_bridge_address=_bridge_address)
 
     _list_known_bulbs = _cli_arguments['--list-bulbs']
     if _list_known_bulbs:
@@ -128,7 +128,7 @@ def _exit_gracefully():
     sys.exit(0)
 
 
-class BuildBotHUEControl(object):
+class MinimalHUEControl(object):
     """simple interface to control a philips HUE from the command line
 
     this implementation uses the phue module to handle the HUE REST API calls

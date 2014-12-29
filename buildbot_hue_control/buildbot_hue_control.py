@@ -3,10 +3,10 @@
 """Simple pyhue wrapper to easily change the color a bulb identified by its name
 
 Usage:
-    buildbot_hue_control.py --bulb=NAME (--set-color=COLOR | --turn-off) [--address=ADDRESS] [--debug]
-    buildbot_hue_control.py --connect [--debug]
-    buildbot_hue_control.py --list-bulbs [--address=ADDRESS] [--debug]
-    buildbot_hue_control.py --list-colors [--debug]
+    buildbot_hue_control.py --bulb=NAME (--set-color=COLOR | --turn-off) [--address=ADDRESS] [--log=LEVEL]
+    buildbot_hue_control.py --connect [--log=LEVEL]
+    buildbot_hue_control.py --list-bulbs [--address=ADDRESS] [--log=LEVEL]
+    buildbot_hue_control.py --list-colors [--log=LEVEL]
 
 
 Options:
@@ -61,59 +61,70 @@ import sys
 import pprint
 import collections
 
+# configure module logger, default log level is configured to info
+logging.basicConfig()
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
 
-def main(_cli_arguments):
+def _main(_cli_arguments):
 
-    print "debug"
+    print "[DEBUG] remove this"
     pprint.pprint(_cli_arguments)
+
+    # try to set the log level from the command line argument, not set if not valid
+    # the defined log levels in the logging module are: 'CRITICAL', 'DEBUG', 'ERROR', 'FATAL', 'INFO', 'WARN' etc.
+    _log_level = _cli_arguments['--log']
+    if _log_level and hasattr(logging, _log_level):
+        logger.setLevel(_log_level)
 
     _list_supported_colors = _cli_arguments['--list-colors']
     if _list_supported_colors:
         bb_hue_control = BuildBotHUEControl()
         bb_hue_control.list_supported_colors()
-        sys.exit(0)
+        _exit_gracefully()
 
     _list_known_bubls = _cli_arguments['--list-bulbs']
     if _list_known_bubls:
         bb_hue_control = BuildBotHUEControl()
         bb_hue_control.list_known_bulbs()
-        sys.exit(0)
+        _exit_gracefully()
+
 
     _bulb_name = _cli_arguments['--bulb']
 
-    _debug = False
     if _cli_arguments['--debug']:
-        _debug = True
+        logger.setLevel(logging.DEBUG)
 
     _bridge_address = _cli_arguments['--address']
     # if _cli_arguments['--address'] is not None:
     #     _bridge_address = _cli_arguments['--address']
 
-    bb_hue_control = BuildBotHUEControl(_debug=_debug, _bridge_address=_bridge_address)
+    bb_hue_control = BuildBotHUEControl(_bridge_address=_bridge_address)
 
     _list_known_bulbs = _cli_arguments['--list-bulbs']
     if _list_known_bulbs:
         bb_hue_control.list_known_bulbs()
-        sys.exit(0)
+        _exit_gracefully()
 
     _connect_application = _cli_arguments['--connect']
     if _connect_application:
         bb_hue_control.connect_application()
-        sys.exit(0)
+        _exit_gracefully()
 
     _turn_off_bulb = _cli_arguments['--turn-off']
     if _turn_off_bulb:
         bb_hue_control.turn_off_bulb(_bulb_name)
-        sys.exit(0)
+        _exit_gracefully()
 
     _set_color = _cli_arguments['--set-color']
     if _set_color:
         bb_hue_control.set_bulb_color(_bulb_name, _set_color)
-        sys.exit(0)
+        _exit_gracefully()
 
 def _exit_gracefully():
+    logger.info('exit gracefully')
     sys.exit(0)
 
 
@@ -134,18 +145,17 @@ class BuildBotHUEControl(object):
 
     Color = collections.namedtuple('Color', 'name, rgb_value')
 
-    def __init__(self, _bulb_name=None, _debug=False,
+    def __init__(self,
+                 _bulb_name=None,
                  _bridge_address=DEFAULT_HUE_BRIDGE_ADDRESS_STRING,
-                 _user_name=DEFAULT_HUE_USERNAME,
-                 _log_level=DEFAULT_LOG_LEVEL):
+                 _user_name=DEFAULT_HUE_USERNAME):
 
         self._bulb_name = _bulb_name
         self._bridge_address = _bridge_address
 
         self._hue_bridge = phue.Bridge(_bridge_address, _user_name)
 
-        logging.basicConfig()
-        self._logger = logging.getLogger(self.__class__.__name__)
+
 
         # define and register the supported colors in RGB representation
         self._colors = []
@@ -157,25 +167,24 @@ class BuildBotHUEControl(object):
         self._colors.append(self.Color('magenta', (255, 0, 255)))
         self._colors.append(self.Color('yellow', (255, 255, 0)))
 
-        if _debug:
-            self._logger.setLevel(logging.DEBUG)
-        else:
-            self._logger.setLevel(_log_level)
-
 
     def list_supported_colors(self):
-        self._logger.info("list supported colors")
-        for color in self._colors:
-            self._logger.info(" * %s" % repr(color))
+
+        logger.debug("DEBUG list supported colors")
+        logger.info("INFO list supported colors")
+        logger.error("ERROR list supported colors")
+
+        # for color in self._colors:
+        #     logger.info(" * %s" % repr(color))
 
 
     def set_bulb_color(self, _bulb_name, _color):
 
         if _color in self._colors[0]:
-            self._logger.info("set color %s for bulb %s" % (_color, _bulb_name))
+            logger.info("set color %s for bulb %s" % (_color, _bulb_name))
             # self._hue_bridge
         else:
-            self._logger.error("color %s unknown, exit immediately" % _color)
+            logger.error("color %s unknown, exit immediately" % _color)
 
 
         # TODO(casasam): this seems to be better, check this lib
@@ -212,16 +221,16 @@ class BuildBotHUEControl(object):
 
 
     def connect_application(self):
-        self._logger.info("connect application to bridge")
+        logger.info("connect application to bridge")
         # self._hue_bridge.connect()
         # logger.error('Failed to open file', exc_info=True)
 
     def turn_off_bulb(self, _bulb_name):
-        self._logger.info("turn off bulb %s" % _bulb_name)
+        logger.info("turn off bulb %s" % _bulb_name)
 
 
     def list_known_bulbs(self):
-        self._logger.info("list the bulbs known by the HUE bridge")
+        logger.info("list the bulbs known by the HUE bridge")
 
     #     for light in bridge.lights:
     # light.on = True
@@ -244,7 +253,7 @@ if __name__ == "__main__":
 
     # handle invalid options
     except docopt.DocoptExit as e:
-        print e.message
+        logger.error(e.message)
         sys.exit(1)
 
-    main(cli_arguments)
+    _main(cli_arguments)

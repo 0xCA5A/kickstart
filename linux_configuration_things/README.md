@@ -1,4 +1,5 @@
 # bash
+## alias
 ```
 alias hibernate='sudo pm-hibernate; dm-tool lock'
 alias suspend='sudo pm-suspend; dm-tool lock'

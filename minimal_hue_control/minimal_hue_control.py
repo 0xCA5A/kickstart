@@ -1,34 +1,38 @@
 #!/usr/bin/env python
 
-"""simple application to easily change the bulb color of a connected bulb
+"""simple application to easily change the light color from the command line
 
 TODO(casasam): write which lib we wrap and where this guy comes from
 
+https://github.com/Q42/hue-libs
+
+
 Usage:
-    minimal_hue_control.py --bulb=NAME (--set-color=COLOR | --turn-off) [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py --light=NAME (--set-color=COLOR | --turn-off) [--address=ADDRESS] [--log=LEVEL]
     minimal_hue_control.py --connect [--address=ADDRESS] [--log=LEVEL]
-    minimal_hue_control.py --list-bulbs [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py --list-lights [--address=ADDRESS] [--log=LEVEL]
     minimal_hue_control.py --list-colors [--log=LEVEL]
 
 Options:
-    --bulb=NAME                 bulb name
+    --light=NAME                light name
     --set-color=COLOR           set color and turn light on
-    --turn-off                  turn bulb off
+    --turn-off                  turn light off
     --address=ADDRESS           HUE bridge address
     --log=LEVEL                 set module log level
     --connect                   register application at HUE bridge (necessary only once)
-    --list-bulbs                list known bulbs
+    --list-lights               list connected lights
     --list-colors               list supported colors
 """
 
 
 import docopt
 import logging
-import phue
 import colorsys
 import sys
 import pprint
 import collections
+
+import phue
 
 
 # configure module logger, default log level is configured to info
@@ -57,9 +61,9 @@ def _main(_cli_arguments):
 
     minimal_hue_control = MinimalHUEControl(_bridge_address=_bridge_address)
 
-    _list_known_bulbs = _cli_arguments['--list-bulbs']
-    if _list_known_bulbs:
-        minimal_hue_control.list_known_bulbs()
+    _list_known_lights = _cli_arguments['--list-lights']
+    if _list_known_lights:
+        minimal_hue_control.list_known_lights()
         _exit_gracefully()
 
     _connect_application = _cli_arguments['--connect']
@@ -67,16 +71,16 @@ def _main(_cli_arguments):
         minimal_hue_control.connect_application()
         _exit_gracefully()
 
-    _bulb_name = _cli_arguments['--bulb']
+    _light_name = _cli_arguments['--light']
 
-    _turn_off_bulb = _cli_arguments['--turn-off']
-    if _turn_off_bulb:
-        minimal_hue_control.turn_off_bulb(_bulb_name)
+    _turn_off_light = _cli_arguments['--turn-off']
+    if _turn_off_light:
+        minimal_hue_control.turn_off_light(_light_name)
         _exit_gracefully()
 
     _set_color = _cli_arguments['--set-color']
     if _set_color:
-        minimal_hue_control.set_bulb_color(_bulb_name, _set_color)
+        minimal_hue_control.set_light_color(_light_name, _set_color)
         _exit_gracefully()
 
 
@@ -126,13 +130,13 @@ class MinimalHUEControl(object):
         self._bridge_address = _bridge_address
         self._hue_bridge = phue.Bridge(_bridge_address, _user_name)
 
-    def set_bulb_color(self, _bulb_name, _color):
+    def set_light_color(self, _light_name, _color):
 
         print "[TODO] add lib call"
 
         for _valid_color in self.colors:
             if _valid_color[0] == _color:
-                logger.info("set color %s for bulb %s" % (_color, _bulb_name))
+                logger.info("set color %s for light %s" % (_color, _light_name))
                 break
         else:
             logger.error("color %s unknown, do not set anything" % _color)
@@ -178,19 +182,19 @@ class MinimalHUEControl(object):
         # logger.error('Failed to open file', exc_info=True)
         print "[TODO] add lib call"
 
-    def turn_off_bulb(self, _bulb_name):
-        logger.info("turn off bulb %s" % _bulb_name)
+    def turn_off_light(self, _light_name):
+        logger.info("turn off light %s" % _light_name)
         print "[TODO] add lib call"
 
-    def list_known_bulbs(self):
-        logger.info("list the bulbs known by the HUE bridge")
+    def list_known_lights(self):
+        logger.info("list the lights known by the HUE bridge")
         print "[TODO] add lib call"
     #     for light in bridge.lights:
     # light.on = True
     # light.hue = 0
     #
 
-    def is_connected(self, bulb_name):
+    def is_connected(self, light_name):
         # try something with getaip here...
         print "[TODO] add lib call"
 

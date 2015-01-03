@@ -27,9 +27,7 @@ Options:
 
 import docopt
 import logging
-import colorsys
 import sys
-import pprint
 import collections
 
 import phue
@@ -97,12 +95,11 @@ class MinimalHUEControl(object):
 
     there are a lot of libs available, check here for more detail:
         https://github.com/Q42/hue-libs
-
     """
 
     DEFAULT_HUE_BRIDGE_ADDRESS_STRING = '192.168.1.123'
     DEFAULT_LOG_LEVEL = logging.INFO
-    DEFAULT_HUE_USERNAME = 'developer'
+    DEFAULT_HUE_USERNAME = 'defaultuser'
 
     Color = collections.namedtuple('Color', 'name, rgb')
 
@@ -119,6 +116,7 @@ class MinimalHUEControl(object):
 
     @staticmethod
     def list_supported_colors():
+        """ function to list the internally supported colors"""
         logger.info("INFO list supported colors")
         for color in MinimalHUEControl.colors:
             logger.info("  * %s" % repr(color))
@@ -131,50 +129,71 @@ class MinimalHUEControl(object):
         self._hue_bridge = phue.Bridge(_bridge_address, _user_name)
 
     def set_light_color(self, _light_name, _color):
+        """function to set a color by name
 
-        print "[TODO] add lib call"
+        :param _light_name: light name
+        :param _color: color name as a string
+        :return:
+        """
 
-        for _valid_color in self.colors:
-            if _valid_color[0] == _color:
-                logger.info("set color %s for light %s" % (_color, _light_name))
-                break
-        else:
-            logger.error("color %s unknown, do not set anything" % _color)
+        logger.info("set light color %s on light %s" % (_color, _light_name))
+        light = self._hue_bridge.get_light_objects(mode='name')[_light_name]
+        light.on = True
 
+        rgb_color_tuple = [color for color in self.colors if color[0] == _color][0][1]
+        x, y = self._rgb_to_xy(rgb_color_tuple[0], rgb_color_tuple[1], rgb_color_tuple[2])
+        light.xy = [x, y]
 
+    @staticmethod
+    def _rgb_to_xy(_red, _green, _blue):
+        """function to convert rgb color values to x y values
 
-        # TODO(casasam): this seems to be better, check this lib
+        :param _red: red color value, 0 - 255
+        :param _green: green color value, 0 - 255
+        :param _blue: blue color value, 0 - 255
+        :return:
+        """
 
-        #
-        # colorsys.rgb_to_hls(r, g, b)
-        #
-        #     Convert the color from RGB coordinates to HLS coordinates.
+        # color gets more complicated...
+        # http://www.developers.meethue.com/documentation/core-concepts
 
-        # check this stuff, https://github.com/issackelly/python-hue/blob/master/hue.py
-        #  def rgb(self, red, green=None, blue=None, transitiontime=5):
-        # if isinstance(red, basestring):
-        # # assume a hex string is passed
-        # rstring = red
-        # red = int(rstring[1:3], 16)
-        # green = int(rstring[3:5], 16)
-        # blue = int(rstring[5:], 16)
-        # print red, green, blue
-        # # We need to convert the RGB value to Yxy.
-        # redScale = float(red) / 255.0
-        # greenScale = float(green) / 255.0
-        # blueScale = float(blue) / 255.0
-        # colormodels.init(
-        # phosphor_red=colormodels.xyz_color(0.64843, 0.33086),
-        # phosphor_green=colormodels.xyz_color(0.4091, 0.518),
-        # phosphor_blue=colormodels.xyz_color(0.167, 0.04))
-        # logger.debug(redScale, greenScale, blueScale)
-        # xyz = colormodels.irgb_color(red, green, blue)
-        # logger.debug(xyz)
-        # xyz = colormodels.xyz_from_rgb(xyz)
-        # logger.debug(xyz)
-        # xyz = colormodels.xyz_normalize(xyz)
-        # logger.debug(xyz)
+        # check this page to understand the HSV / HSB color model
+        # http://colorizer.org/
 
+        # check here for further information about this color conversion:
+        #   https://github.com/PhilipsHue/PhilipsHueSDK-iOS-OSX/blob/master/ApplicationDesignNotes/RGB%20to%20xy%20Color%20conversion.md
+
+        # scale rgb values, normalize to one
+        red = _red / 255.0
+        green = _green / 255.0
+        blue = _blue / 255.0
+
+        # gamma correction
+        gamma_correction = lambda scaled_color_value: pow((scaled_color_value + 0.055) / (1.0 + 0.055), 2.4) if (scaled_color_value > 0.04045) else (scaled_color_value / 12.92)
+        red = gamma_correction(red)
+        green = gamma_correction(green)
+        blue = gamma_correction(blue)
+
+        # convert the RGB values to XYZ using the Wide RGB D65 conversion formula
+        X = red * 0.649926 + green * 0.103455 + blue * 0.197109
+        Y = red * 0.234327 + green * 0.743075 + blue * 0.022598
+        Z = red * 0.000000 + green * 0.053077 + blue * 1.035763
+
+        # TODO: check this matrix parameter from here:
+        #   http://de.wikipedia.org/wiki/CIE-Normvalenzsystem
+        # X = 0.4124 * red + 0.3576 * green + 0.1805 * blue
+        # Y = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+        # Z = 0.0193 * red + 0.1192 * green + 0.9505 * blue
+
+        if X + Y + Z == 0:
+            return 0,0
+
+        # calculate the xy values from the XYZ values
+        x = X / (X + Y + Z)
+        y = Y / (X + Y + Z)
+
+        logger.debug("converted rgb value %s to x: %f and y: %f" % (repr((_red, _green, _blue)), x, y))
+        return x, y
 
     def connect_application(self):
         logger.info("connect application to bridge")
@@ -183,22 +202,23 @@ class MinimalHUEControl(object):
         print "[TODO] add lib call"
 
     def turn_off_light(self, _light_name):
+        """library call to disable a light
+
+        :param _light_name: light name
+        :return: None
+        """
         logger.info("turn off light %s" % _light_name)
-        print "[TODO] add lib call"
+        lights_by_name = self._hue_bridge.get_light_objects(mode='name')
+        lights_by_name[_light_name].on = False
 
     def list_known_lights(self):
+        """library call to get a list of the connected lights
+
+        :return:
+        """
         logger.info("list the lights known by the HUE bridge")
-        print "[TODO] add lib call"
-    #     for light in bridge.lights:
-    # light.on = True
-    # light.hue = 0
-    #
-
-    def is_connected(self, light_name):
-        # try something with getaip here...
-        print "[TODO] add lib call"
-
-
+        lights_by_name = self._hue_bridge.get_light_objects(mode='name')
+        logger.info(lights_by_name.keys())
 
 if __name__ == "__main__":
 

@@ -9,7 +9,7 @@ for further information about philips hue, check here:
 Usage:
     minimal_hue_control.py --light=NAME (--set-color=COLOR | --turn-off | --test) [--user=USERNAME] [--address=ADDRESS] [--log=LEVEL]
     minimal_hue_control.py --register --user=USERNAME [--address=ADDRESS] [--log=LEVEL]
-    minimal_hue_control.py --list-lights [--user=USERNAME] [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py (--list-lights | --search) [--user=USERNAME] [--address=ADDRESS] [--log=LEVEL]
     minimal_hue_control.py --list-colors [--log=LEVEL]
 
 Options:
@@ -21,6 +21,7 @@ Options:
     --address=ADDRESS           HUE bridge address
     --log=LEVEL                 set module log level
     --register                  register application at HUE bridge (necessary only once)
+    --search                    search for new lights
     --list-lights               list connected lights
     --list-colors               list supported colors
 """
@@ -38,7 +39,7 @@ import phue
 # configure module logger, default log level is configured to info
 logging.basicConfig()
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 def _main(_cli_arguments):
@@ -69,6 +70,11 @@ def _main(_cli_arguments):
     _list_known_lights = _cli_arguments['--list-lights']
     if _list_known_lights:
         minimal_hue_control.list_known_lights()
+        _exit_gracefully()
+
+    _search_lights = _cli_arguments['--search']
+    if _search_lights:
+        minimal_hue_control.search_for_lights()
         _exit_gracefully()
 
     _register_username = _cli_arguments['--register']
@@ -163,7 +169,7 @@ class MinimalHUEControl(object):
         :return: None
         """
 
-        logger.info("set light color %s on light %s", _color, _light_name)
+        logger.info("set color %s on light %s", _color, _light_name)
         light = self._hue_bridge.get_light_objects(mode='name')[_light_name]
         light.on = True
 
@@ -225,9 +231,16 @@ class MinimalHUEControl(object):
         return x, y
 
     def register_username(self):
+        """function to register a username
+
+        this is used as security concept.
+        you have to register a username first (while pressing the button on the bridge), to access the bridge
+
+        :return:
+        """
         logger.info("register username on bridge")
         # self._hue_bridge.connect()
-        logger.error("LIBRARY FUNCTION CALL NOT IMPLEMENTED")
+        logger.error("[TODO] LIBRARY FUNCTION CALL NOT IMPLEMENTED, USE THE CLIP API DEBUGGER (debug/clip.html)")
 
     def turn_off_light(self, _light_name):
         """library call to disable a light
@@ -241,22 +254,31 @@ class MinimalHUEControl(object):
 
     def list_known_lights(self):
         """library call to print a list of the connected lights (by name)"""
-        logger.info("list the lights known by the HUE bridge")
+        logger.info("lights known by the HUE bridge")
         lights_by_name = self._hue_bridge.get_light_objects(mode='name')
         logger.info(lights_by_name.keys())
         logger.debug(repr(lights_by_name))
 
+    def search_for_lights(self):
+        """function to search for new lights / update the list of known lights
+
+        use this function to scan for new HUE lights
+
+        :return: None
+        """
+        logger.info("search for lights")
+        self._hue_bridge.request('POST', '/api/' + self._hue_bridge.username + '/lights')
 
 
 if __name__ == "__main__":
 
     try:
         # parse cli arguments, use file docstring as a parameter definition
-        cli_arguments = docopt.docopt(__doc__)
+        CLI_ARGUMENTS = docopt.docopt(__doc__)
 
     # handle invalid options
     except docopt.DocoptExit as exception:
         logger.error(exception.message)
         sys.exit(1)
 
-    _main(cli_arguments)
+    _main(CLI_ARGUMENTS)

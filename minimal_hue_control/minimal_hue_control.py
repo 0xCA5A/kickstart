@@ -106,6 +106,12 @@ def _exit_gracefully():
     sys.exit(0)
 
 
+def _exit_failure():
+    """helper function to log am message and exit the application"""
+    logger.error('exit failure')
+    sys.exit(1)
+
+
 class MinimalHUEControl(object):
     """simple interface to control a philips HUE from the command line
 
@@ -142,6 +148,74 @@ class MinimalHUEControl(object):
         # NOTE(casasam): does it make sense from the API just to have one user per bridge instance?
         self._hue_bridge = phue.Bridge(_bridge_address, _user_name)
 
+    def check_username_decorator(func):
+        """ function decorator to check username
+
+        in good case: the call returns a dict (json)
+
+        in error case: the call returns a list with a dict (json)
+        we look for something like this:
+            [{u'error': {u'type': 1, u'description': u'unauthorized user', u'address': u'/'}}]
+
+        :param func:
+        :return:
+        """
+        def func_wrapper(self, *args, **kwargs):
+            logger.debug("in check username function wrapper")
+            response = self._hue_bridge.request('GET', '/api/' + self._hue_bridge.username)
+
+            if isinstance(response, list):
+                logger.error(response[0]['error']['description'])
+                _exit_failure()
+
+            # call wrapped function
+            func(self, *args, **kwargs)
+
+        return func_wrapper
+
+    def check_light_decorator(func):
+        """ function decorator to check if light is known
+
+        in good case: the call returns a dict (json)
+
+        in error case: the call returns a list with a dict (json)
+        we look for something like this:
+            [{u'error': {u'type': 3, u'description': u'resource, /lights/12, not available', u'address': u'/lights/12'}}]
+
+        :param func:
+        :return:
+        """
+        def func_wrapper(self, *args, **kwargs):
+            logger.debug("in check light function wrapper")
+
+            # expect light name in first argument
+            _UNDEFINED_NAME_PATTERN = "dummy_undefined_pattern_string"
+            light_name = _UNDEFINED_NAME_PATTERN
+            if len(args) > 0:
+                light_name = args[0]
+
+            # get all the lights from the bridge (raw)
+            response = self._hue_bridge.request('GET', '/api/' + self._hue_bridge.username + '/lights/')
+
+            # catch any kind of error
+            if isinstance(response, list):
+                logger.error(response[0]['error']['description'])
+                _exit_failure()
+
+            if light_name is not _UNDEFINED_NAME_PATTERN:
+                # try to find the light by name
+                for key in response:
+                    if response[key]["name"] == light_name:
+                        break
+                else:
+                    logger.error("light named '%s' not found", light_name)
+                    _exit_failure()
+
+            # call wrapped function
+            func(self, *args, **kwargs)
+
+        return func_wrapper
+
     @staticmethod
     def list_supported_colors():
         """ function to list the internally supported colors"""
@@ -161,6 +235,8 @@ class MinimalHUEControl(object):
             self.set_light_color(_light_name, color[0])
             time.sleep(self.DEFAULT_COLOR_TEST_SLEEP_TIME_IN_SEC)
 
+    @check_username_decorator
+    @check_light_decorator
     def set_light_color(self, _light_name, _color):
         """function to set a color by name
 
@@ -242,6 +318,8 @@ class MinimalHUEControl(object):
         # self._hue_bridge.connect()
         logger.error("[TODO] LIBRARY FUNCTION CALL NOT IMPLEMENTED, USE THE CLIP API DEBUGGER (debug/clip.html)")
 
+    @check_username_decorator
+    @check_light_decorator
     def turn_off_light(self, _light_name):
         """library call to disable a light
 
@@ -252,6 +330,7 @@ class MinimalHUEControl(object):
         lights_by_name = self._hue_bridge.get_light_objects(mode='name')
         lights_by_name[_light_name].on = False
 
+    @check_username_decorator
     def list_known_lights(self):
         """library call to print a list of the connected lights (by name)"""
         logger.info("lights known by the HUE bridge")
@@ -259,6 +338,7 @@ class MinimalHUEControl(object):
         logger.info(lights_by_name.keys())
         logger.debug(repr(lights_by_name))
 
+    @check_username_decorator
     def search_for_lights(self):
         """function to search for new lights / update the list of known lights
 

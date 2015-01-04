@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
 """simple application to easily change the light color from the command line
-
-TODO(casasam): write which lib we wrap and where this guy comes from
-
-https://github.com/Q42/hue-libs
-
+for further information about philips hue, check here:
+    * https://github.com/Q42/hue-libs
+    * http://www.developers.meethue.com/documentation/core-concepts
+    * http://www.developers.meethue.com/documentation/getting-started
 
 Usage:
-    minimal_hue_control.py --light=NAME (--set-color=COLOR | --turn-off | --test) [--address=ADDRESS] [--log=LEVEL]
-    minimal_hue_control.py --register [--address=ADDRESS] [--log=LEVEL]
-    minimal_hue_control.py --list-lights [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py --light=NAME (--set-color=COLOR | --turn-off | --test) [--user=USERNAME] [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py --register --user=USERNAME [--address=ADDRESS] [--log=LEVEL]
+    minimal_hue_control.py --list-lights [--user=USERNAME] [--address=ADDRESS] [--log=LEVEL]
     minimal_hue_control.py --list-colors [--log=LEVEL]
 
 Options:
@@ -18,6 +17,7 @@ Options:
     --set-color=COLOR           set color and turn light on
     --turn-off                  turn light off
     --test                      test mode to show all the configured colors
+    --user=USERNAME             application identifier / username (register first at bridge!)
     --address=ADDRESS           HUE bridge address
     --log=LEVEL                 set module log level
     --register                  register application at HUE bridge (necessary only once)
@@ -56,11 +56,15 @@ def _main(_cli_arguments):
         MinimalHUEControl.list_supported_colors()
         _exit_gracefully()
 
-    _bridge_address = MinimalHUEControl.DEFAULT_HUE_BRIDGE_ADDRESS_STRING
+    _bridge_address = MinimalHUEControl.DEFAULT_HUE_BRIDGE_ADDRESS
     if _cli_arguments['--address'] is not None:
         _bridge_address = _cli_arguments['--address']
 
-    minimal_hue_control = MinimalHUEControl(_bridge_address=_bridge_address)
+    _user_name = MinimalHUEControl.DEFAULT_HUE_USERNAME
+    if _cli_arguments['--user'] is not None:
+        _user_name = _cli_arguments['--user']
+
+    minimal_hue_control = MinimalHUEControl(_bridge_address=_bridge_address, _user_name=_user_name)
 
     _list_known_lights = _cli_arguments['--list-lights']
     if _list_known_lights:
@@ -99,16 +103,16 @@ def _exit_gracefully():
 class MinimalHUEControl(object):
     """simple interface to control a philips HUE from the command line
 
-    this implementation uses the phue module to handle the HUE REST API calls
+    this implementation uses the phue python module to handle the philips HUE REST API calls
         https://github.com/studioimaginaire/phue
 
     there are a lot of libs available, check here for more detail:
         https://github.com/Q42/hue-libs
     """
 
-    DEFAULT_HUE_BRIDGE_ADDRESS_STRING = '192.168.1.123'
+    DEFAULT_HUE_BRIDGE_ADDRESS = '192.168.1.123'
     DEFAULT_LOG_LEVEL = logging.INFO
-    DEFAULT_HUE_USERNAME = 'devusername'
+    DEFAULT_HUE_USERNAME = 'defautluser'
     DEFAULT_COLOR_TEST_SLEEP_TIME_IN_SEC = 2
 
     Color = collections.namedtuple('Color', 'name, rgb')
@@ -125,10 +129,11 @@ class MinimalHUEControl(object):
     ]
 
     def __init__(self,
-                 _bridge_address=DEFAULT_HUE_BRIDGE_ADDRESS_STRING,
+                 _bridge_address=DEFAULT_HUE_BRIDGE_ADDRESS,
                  _user_name=DEFAULT_HUE_USERNAME):
 
         self._bridge_address = _bridge_address
+        # NOTE(casasam): does it make sense from the API just to have one user per bridge instance?
         self._hue_bridge = phue.Bridge(_bridge_address, _user_name)
 
     @staticmethod
@@ -136,7 +141,7 @@ class MinimalHUEControl(object):
         """ function to list the internally supported colors"""
         logger.info("list supported colors")
         for color in MinimalHUEControl.colors:
-            logger.info("  * %s" % repr(color))
+            logger.info("  * %s", repr(color))
 
     def test_colors(self, _light_name):
         """test function to test all the known color patterns
@@ -145,7 +150,7 @@ class MinimalHUEControl(object):
         :return: None
         """
 
-        logger.info("show supported colors on light %s" % (_light_name))
+        logger.info("show supported colors on light %s", _light_name)
         for color in MinimalHUEControl.colors:
             self.set_light_color(_light_name, color[0])
             time.sleep(self.DEFAULT_COLOR_TEST_SLEEP_TIME_IN_SEC)
@@ -158,7 +163,7 @@ class MinimalHUEControl(object):
         :return: None
         """
 
-        logger.info("set light color %s on light %s" % (_color, _light_name))
+        logger.info("set light color %s on light %s", _color, _light_name)
         light = self._hue_bridge.get_light_objects(mode='name')[_light_name]
         light.on = True
 
@@ -201,20 +206,22 @@ class MinimalHUEControl(object):
         Y = red * 0.234327 + green * 0.743075 + blue * 0.022598
         Z = red * 0.000000 + green * 0.053077 + blue * 1.035763
 
-        # TODO: check this matrix parameter from here:
+        # NOTE(casasam): check this matrix parameter from here:
         #   http://de.wikipedia.org/wiki/CIE-Normvalenzsystem
         # X = 0.4124 * red + 0.3576 * green + 0.1805 * blue
         # Y = 0.2126 * red + 0.7152 * green + 0.0722 * blue
         # Z = 0.0193 * red + 0.1192 * green + 0.9505 * blue
+        # and here:
+        #   http://en.wikipedia.org/wiki/CIE_1931_color_space
 
         if X + Y + Z == 0:
-            return 0,0
+            return 0, 0
 
         # calculate the xy values from the XYZ values
         x = X / (X + Y + Z)
         y = Y / (X + Y + Z)
 
-        logger.debug("converted rgb value %s to x: %f and y: %f" % (repr((_red, _green, _blue)), x, y))
+        logger.debug("converted rgb value %s to x: %f and y: %f", repr((_red, _green, _blue)), x, y)
         return x, y
 
     def register_username(self):
@@ -228,15 +235,17 @@ class MinimalHUEControl(object):
         :param _light_name: light name
         :return: None
         """
-        logger.info("turn off light %s" % _light_name)
+        logger.info("turn off light %s", _light_name)
         lights_by_name = self._hue_bridge.get_light_objects(mode='name')
         lights_by_name[_light_name].on = False
 
     def list_known_lights(self):
-        """library call to get a list of the connected lights"""
+        """library call to print a list of the connected lights (by name)"""
         logger.info("list the lights known by the HUE bridge")
         lights_by_name = self._hue_bridge.get_light_objects(mode='name')
         logger.info(lights_by_name.keys())
+        logger.debug(repr(lights_by_name))
+
 
 
 if __name__ == "__main__":
@@ -246,8 +255,8 @@ if __name__ == "__main__":
         cli_arguments = docopt.docopt(__doc__)
 
     # handle invalid options
-    except docopt.DocoptExit as e:
-        logger.error(e.message)
+    except docopt.DocoptExit as exception:
+        logger.error(exception.message)
         sys.exit(1)
 
     _main(cli_arguments)

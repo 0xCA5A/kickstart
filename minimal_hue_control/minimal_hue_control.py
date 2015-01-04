@@ -126,6 +126,7 @@ class MinimalHUEControl(object):
     DEFAULT_LOG_LEVEL = logging.INFO
     DEFAULT_HUE_USERNAME = 'defautluser'
     DEFAULT_COLOR_TEST_SLEEP_TIME_IN_SEC = 2
+    DEFAULT_BRIGHTNESS_MAX = 254
 
     Color = collections.namedtuple('Color', 'name, rgb')
 
@@ -247,11 +248,12 @@ class MinimalHUEControl(object):
 
         logger.info("set color %s on light %s", _color, _light_name)
         light = self._hue_bridge.get_light_objects(mode='name')[_light_name]
-        light.on = True
 
         rgb_color_tuple = [color for color in self.colors if color[0] == _color][0][1]
         x, y = self._rgb_to_xy(rgb_color_tuple[0], rgb_color_tuple[1], rgb_color_tuple[2])
         light.xy = [x, y]
+        light.brightness = self.DEFAULT_BRIGHTNESS_MAX
+        light.on = True
 
     @staticmethod
     def _rgb_to_xy(_red, _green, _blue):
@@ -283,18 +285,18 @@ class MinimalHUEControl(object):
         green = gamma_correction(green)
         blue = gamma_correction(blue)
 
+        # NOTE(casasam): the resulting colors with this matrix look strange for me
         # convert the RGB values to XYZ using the Wide RGB D65 conversion formula
-        X = red * 0.649926 + green * 0.103455 + blue * 0.197109
-        Y = red * 0.234327 + green * 0.743075 + blue * 0.022598
-        Z = red * 0.000000 + green * 0.053077 + blue * 1.035763
+        # X = red * 0.649926 + green * 0.103455 + blue * 0.197109
+        # Y = red * 0.234327 + green * 0.743075 + blue * 0.022598
+        # Z = red * 0.000000 + green * 0.053077 + blue * 1.035763
 
-        # NOTE(casasam): check this matrix parameter from here:
+        # NOTE(casasam): this parameter from here look better for me, source:
         #   http://de.wikipedia.org/wiki/CIE-Normvalenzsystem
-        # X = 0.4124 * red + 0.3576 * green + 0.1805 * blue
-        # Y = 0.2126 * red + 0.7152 * green + 0.0722 * blue
-        # Z = 0.0193 * red + 0.1192 * green + 0.9505 * blue
-        # and here:
         #   http://en.wikipedia.org/wiki/CIE_1931_color_space
+        X = red * 0.4124 + green * 0.3576 + blue * 0.1805
+        Y = red * 0.2126 + green * 0.7152 + blue * 0.0722
+        Z = red * 0.0193 + green * 0.1192 + blue * 0.9505
 
         if X + Y + Z == 0:
             return 0, 0

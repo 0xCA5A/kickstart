@@ -54,7 +54,7 @@ def main(docopt_args):
         event_title = docopt_args["--title"]
 
     print "[INFO] '%s' date:\t\t%s" % (event_title, date_x)
-    print "[INFO] time to event from now:\t\t\t%s" % date_delta
+    print "[INFO] time to event from now:\t\t%s" % date_delta
 
     if docopt_args["--verbose"]:
         in_seconds = date_delta.total_seconds()

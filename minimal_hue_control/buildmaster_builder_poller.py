@@ -16,6 +16,8 @@ Options:
     --list-colors               list supported colors
 """
 
+# pylint: disable=C0301
+
 import json
 import docopt
 import logging
@@ -24,12 +26,6 @@ import time
 import minimal_hue_control
 import pycurl
 import cStringIO
-
-
-# configure module logger, default log level is configured to info
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 class BuildMasterBuilderStepState(object):
@@ -55,7 +51,7 @@ class BuildMasterBuilderPoller(object):
     GLOBAL_RUN_FLAG = True
 
     def __init__(self):
-        logger.info("create %s object", self.__class__.__name__)
+        logging.info("create %s object", self.__class__.__name__)
 
         self._hue_bridge_address = None
         self._hue_bridge_user = None
@@ -79,7 +75,7 @@ class BuildMasterBuilderPoller(object):
 
         :return: None
         """
-        logger.info("current configuration")
+        logging.info("current configuration")
         interesting_class_variable_prefix = ("_hue", "_buildmaster", "_color", "_poller")
         for key in sorted(self.__dict__.keys()):
             if key.startswith(interesting_class_variable_prefix):
@@ -139,7 +135,7 @@ class BuildMasterBuilderPoller(object):
         :param _light_color: string
         :return:
         """
-        logger.info("update hue light, new color is %s", _light_color)
+        logging.info("update hue light, new color is %s", _light_color)
         self._my_minimal_hue_control.set_light_color(_light_name=self._hue_light_name, _color=_light_color)
 
     def _get_buildmaster_builder_data(self):
@@ -150,6 +146,8 @@ class BuildMasterBuilderPoller(object):
 
         :return: JSON data
         """
+
+        logging.debug("get builder data from buildmaster")
 
         buf = cStringIO.StringIO()
         url = self._buildmaster_address + "/json/builders/" + self._buildmaster_builder
@@ -217,7 +215,7 @@ class BuildMasterBuilderPoller(object):
 
         # did the builder fail?
         if "failed" in _build_info["text"]:
-            logger.debug("builder fail detected")
+            logging.debug("builder fail detected")
 
             # why did it fail? tests or build or something unknown
             for step in _build_info["steps"]:
@@ -234,7 +232,7 @@ class BuildMasterBuilderPoller(object):
             return BuildMasterBuilderStepState.UNKNOWN_FAILED
 
         else:
-            logger.info("successful build detected")
+            logging.info("successful build detected")
             return BuildMasterBuilderStepState.SUCCESS
 
     def poll_buildmaster_builder(self):
@@ -245,7 +243,7 @@ class BuildMasterBuilderPoller(object):
         :return: should never return
         """
 
-        logger.info("start buildmaster poller, poll interval is %ds", self._poller_interval_in_sec)
+        logging.info("start buildmaster poller, poll interval is %ds", self._poller_interval_in_sec)
         while self.GLOBAL_RUN_FLAG:
 
             current_buildmaster_builder_state = self._get_buildmaster_builder_state()
@@ -253,7 +251,7 @@ class BuildMasterBuilderPoller(object):
             # detect change in buildmaster buidler state (None, IDLE, BUILDING)
             if current_buildmaster_builder_state != self._cached_buildmaster_builder_state:
 
-                logger.info("buildmaster builder state changed from %s to %s", self._cached_buildmaster_builder_state, current_buildmaster_builder_state)
+                logging.info("buildmaster builder state changed from %s to %s", self._cached_buildmaster_builder_state, current_buildmaster_builder_state)
 
                 if current_buildmaster_builder_state == BuildMasterBuilderState.BUILDING:
                     new_color = self._get_color_by_state(current_buildmaster_builder_state)
@@ -265,7 +263,7 @@ class BuildMasterBuilderPoller(object):
 
                     build_info = self._get_last_cached_build_info(last_cached_build_id)
                     current_builder_build_state = self._get_builder_build_state_from_build_info(build_info)
-                    logger.info("last cached buildmaster builder build state is %s (build id: %d)", current_builder_build_state, last_cached_build_id)
+                    logging.info("last cached buildmaster builder build state is %s (build id: %d)", current_builder_build_state, last_cached_build_id)
 
                     new_color = self._get_color_by_state(current_builder_build_state)
                     if new_color:
@@ -302,6 +300,7 @@ def _main(_cli_arguments):
     """main function to handle command line arguments
     """
 
+
     # set the log level from the command line argument, not set if not valid
     # valid log levels (from python logging module):
     #   'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'
@@ -326,6 +325,15 @@ def _main(_cli_arguments):
     bmbp.poll_buildmaster_builder()
 
 if __name__ == "__main__":
+
+    # setup logger
+    logger = logging.getLogger()
+    logger.handlers = []
+    logging.basicConfig(
+            level=logging.INFO,
+            format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+            datefmt=None, stream=sys.stdout)
+    logger.setLevel(logging.INFO)
 
     try:
         # parse cli arguments, use file docstring as a parameter definition

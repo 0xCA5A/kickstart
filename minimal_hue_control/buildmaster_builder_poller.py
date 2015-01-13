@@ -225,8 +225,11 @@ class BuildMasterBuilderPoller(object):
                     return BuildMasterBuilderStepState.COMPILE_FAILED
 
                 # check for tests failing python tests
-                if "failed" in step["text"] and "python" in step["text"]:
-                    return BuildMasterBuilderStepState.TEST_FAILED
+                # there was an issue with the tokens,
+                if "failed" in step["text"]:
+                    for token in step["text"]:
+                        if "python" in token:
+                            return BuildMasterBuilderStepState.TEST_FAILED
 
             # default fail, show unknown fail pattern
             return BuildMasterBuilderStepState.UNKNOWN_FAILED

@@ -33,8 +33,7 @@ import sys
 import collections
 import time
 
-import phue
-
+from phue import phue
 
 # configure module logger, default log level is configured to info
 logging.basicConfig()

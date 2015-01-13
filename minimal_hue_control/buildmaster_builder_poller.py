@@ -66,18 +66,23 @@ class BuildMasterBuilderPoller(object):
         self._buildmaster_address = None
         self._buildmaster_builder = None
 
-        self._color_building = None
-        self._color_success = None
-        self._color_build_failed = None
-        self._color_test_failed = None
-        self._color_unknown_failed = None
+        self._color_building = "RED"
+        self._color_success = "GREEN"
+        self._color_build_failed = "BLUE"
+        self._color_test_failed = "WHITE"
+        self._color_unknown_failed = "YELLOW"
 
         self._my_mmhc = None
-
         self._cached_buildmaster_builder_state = None
-
         self._poller_interval_in_sec = self.DEFAULT_POLL_INTERVAL_IN_SEC
 
+    def log_config(self):
+        logger.info("current configuration")
+
+        interesting_class_variable_prefix = ("_hue", "_buildmaster", "_color", "_poller")
+        for key in self.__dict__.keys():
+            if key.startswith(interesting_class_variable_prefix):
+                logging.info(" * %s: %s", key, self.__dict__[key])
 
     def read_config_file(self, _json_config_file_path=DEFAULT_CONFIG_FILE_PATH):
         logging.info("read configuration file %s", _json_config_file_path)
@@ -291,6 +296,9 @@ def _main(_cli_arguments):
 
     BBMBP = BuildMasterBuilderPoller()
     BBMBP.read_config_file(_config_file_path)
+
+    BBMBP.log_config()
+
     BBMBP.setup_objects()
     BBMBP.poll_buildmaster_builder()
 

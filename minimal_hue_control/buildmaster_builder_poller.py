@@ -174,6 +174,9 @@ class BuildMasterBuilderPoller(object):
 
     def _get_builder_build_state_from_build_info(self, _build_info):
 
+        # curl -X GET -H "Content-type: application/json" https://openwrt.neratec.com/buildbot/json/builders/DT50_Alstom/builds/366 | python -m json.tool | less
+
+
         # {u'eta': None,
         #  u'expectations': [[u'output', 64075, None]],
         #  u'hidden': False,
@@ -299,11 +302,6 @@ class BuildMasterBuilderPoller(object):
         if _buildmaster_builder_state == BuildMasterBuilderState.IDLE:
             return None
 
-    @classmethod
-    def signal_handler(cls, signum, frame):
-        logger.info("got signal, lets exit")
-        BuildMasterBuilderPoller.GLOBAL_RUN_FLAG = False
-
 def _main(_cli_arguments):
     """main function to handle command line arguments"""
 
@@ -334,14 +332,16 @@ def _main(_cli_arguments):
 
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, BuildMasterBuilderPoller.signal_handler)
+
     try:
         # parse cli arguments, use file docstring as a parameter definition
         CLI_ARGUMENTS = docopt.docopt(__doc__)
+        _main(CLI_ARGUMENTS)
 
     # handle invalid options
     except docopt.DocoptExit as exception:
         logger.error(exception.message)
         sys.exit(1)
-
-    _main(CLI_ARGUMENTS)
+    # handle ctrl c
+    except KeyboardInterrupt as exception:
+        logger.info("^C received, exit application")

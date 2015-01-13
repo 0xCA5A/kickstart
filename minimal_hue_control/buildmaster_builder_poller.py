@@ -48,8 +48,6 @@ class BuildMasterBuilderState(object):
     IDLE = "idle"
     BUILDING = "building"
 
-
-
 class BuildMasterBuilderPoller(object):
 
     DEFAULT_CONFIG_FILE_PATH = "config.json"
@@ -126,25 +124,8 @@ class BuildMasterBuilderPoller(object):
         logger.info("update hue light, new color is %s",  _light_color)
         self._my_minimal_hue_control.set_light_color(_light_name=self._hue_light_name, _color=_light_color)
 
-    def _get_buildmaster_builder_state(self):
 
-        # curl -X GET -H "Content-type: application/json"  https://openwrt.neratec.com/buildbot/json/builders/DT50_Alstom/ | python -m json.tool
-
-        buf = cStringIO.StringIO()
-
-        print self._buildmaster_address + "/json/builders/" + self._buildmaster_builder
-
-        c = pycurl.Curl()
-        c.setopt(c.URL, self._buildmaster_address + "/json/builders/" + self._buildmaster_builder)
-        c.setopt(c.WRITEFUNCTION, buf.write)
-        c.perform()
-        json_data = json.loads(buf.getvalue())
-        buf.close()
-
-        return json_data["state"]
-
-    def _get_last_cached_build(self):
-
+    def _get_buildmaster_builder_data(self):
         # curl -X GET -H "Content-type: application/json"  https://openwrt.neratec.com/buildbot/json/builders/DT50_Alstom/ | python -m json.tool
 
         buf = cStringIO.StringIO()
@@ -153,12 +134,23 @@ class BuildMasterBuilderPoller(object):
         c.setopt(c.URL, url)
         c.setopt(c.WRITEFUNCTION, buf.write)
         c.perform()
-        json_data = json.loads(buf.getvalue())
+        build_master_builder_data_json = json.loads(buf.getvalue())
         buf.close()
 
+        return build_master_builder_data_json
+
+    def _get_buildmaster_builder_state(self):
+        build_master_builder_data_json = self._get_buildmaster_builder_data()
+        return build_master_builder_data_json["state"]
+
+    def _get_last_cached_build(self):
+        build_master_builder_data_json = self._get_buildmaster_builder_data()
+
         # return highest number in list
-        cached_builds = json_data["cachedBuilds"]
-        return max(map(int, cached_builds))
+        cached_builds = build_master_builder_data_json["cachedBuilds"]
+        last_cached_build_id = max(map(int, cached_builds))
+
+        return last_cached_build_id
 
 
 
@@ -180,37 +172,77 @@ class BuildMasterBuilderPoller(object):
 
         return json_data
 
-    def _get_state_from_build_info(self, _build_info):
-        # pprint.pprint(_build_info)
+    def _get_builder_build_state_from_build_info(self, _build_info):
 
-        # print _build_info["text"]
-        # pprint.pprint(_build_info)
-        #
-        # print _build_info.keys()
+        # {u'eta': None,
+        #  u'expectations': [[u'output', 64075, None]],
+        #  u'hidden': False,
+        #  u'isFinished': True,
+        #  u'isStarted': True,
+        #  u'logs': [[u'stdio',
+        #             u'http://openwert.neratec.com/buildbotbuilders/DT50_Alstom/builds/367/steps/make_target_compile/logs/stdio'],
+        #            [u'warnings (4)',
+        #             u'http://openwert.neratec.com/buildbotbuilders/DT50_Alstom/builds/367/steps/make_target_compile/logs/warnings%20%284%29']],
+        #  u'name': u'make_target_compile',
+        #  u'results': [1, []],
+        #  u'statistics': {u'warnings': 4},
+        #  u'step_number': 12,
+        #  u'text': [u'compile', u'warnings'],
+        #  u'times': [1421135631.493963, 1421135680.065545],
+        #  u'urls': {}}
+        # {u'eta': None,
+        #  u'expectations': [[u'output', 9254046, None]],
+        #  u'hidden': False,
+        #  u'isFinished': True,
+        #  u'isStarted': True,
+        #  u'logs': [[u'stdio',
+        #             u'http://openwert.neratec.com/buildbotbuilders/DT50_Alstom/builds/367/steps/make_package_compile/logs/stdio'],
+        #            [u'warnings (782)',
+        #             u'http://openwert.neratec.com/buildbotbuilders/DT50_Alstom/builds/367/steps/make_package_compile/logs/warnings%20%28782%29']],
+        #  u'name': u'make_package_compile',
+        #  u'results': [2, [u'make_package_compile']],
+        #  u'statistics': {u'warnings': 782},
+        #  u'step_number': 13,
+        #  u'text': [u'compile', u'failed'],
+        #  u'times': [1421135680.079958, 1421136022.991409],
+        #  u'urls': {}}
+        # {u'eta': None,
+        #  u'expectations': [[u'output', None, 9934.0]],
+        #  u'hidden': False,
+        #  u'isFinished': False,
+        #  u'isStarted': False,
+        #  u'logs': [],
+        #  u'name': u'shell_1',
+        #  u'results': [None, []],
+        #  u'statistics': {},
+        #  u'step_number': 30,
+        #  u'text': [],
+        #  u'times': [None, None],
+        #  u'urls': {}}
 
 
 
+        # did the builder fail?
         if "failed" in _build_info["text"]:
-            logger.info("failed build detected")
+            logger.debug("builder fail detected")
 
-            # why did it fail?
+            # why did it fail? tests or build or something unknown
             for step in _build_info["steps"]:
 
-                # we assume that the build stops after a compile fail
-                if 2 in step["results"] and "make" in step["name"]:
+                # failing compile step (buildbot naming)
+                if "failed" in step["text"] and "compile" in step["text"]:
                     return BuildMasterBuildJobState.COMPILE_FAILED
 
-                # check for failing tests
+                # check for tests failing python tests
+                if "failed" in step["text"] and "python" in step["text"]:
+                    return BuildMasterBuildJobState.TEST_FAILED
 
-
-            # default fail state
-            return BuildMasterBuildJobState.UNKNOWN_FAIL
+            # default fail, show unknown fail pattern
+            return BuildMasterBuildJobState.UNKNOWN_FAILED
 
         else:
             logger.info("successful build detected")
             return BuildMasterBuildJobState.SUCCESS
-
-
 
     def poll_buildmaster_builder(self):
         """
@@ -223,6 +255,7 @@ class BuildMasterBuilderPoller(object):
 
             current_buildmaster_builder_state = self._get_buildmaster_builder_state()
 
+            # detect change in buildmaster buidler state (None, IDLE, BUILDING)
             if current_buildmaster_builder_state != self._cached_buildmaster_builder_state:
 
                 logger.info("buildmaster builder state changed from %s to %s" % (self._cached_buildmaster_builder_state, current_buildmaster_builder_state))
@@ -234,17 +267,17 @@ class BuildMasterBuilderPoller(object):
                 # if we switch to idle we have to check the state
                 if current_buildmaster_builder_state == BuildMasterBuilderState.IDLE:
                     last_cached_build_id = self._get_last_cached_build()
-                    build_info = self._get_last_cached_build_info(last_cached_build_id)
-                    state = self._get_state_from_build_info(build_info)
 
-                    new_color = self._get_color_by_state(state)
-                    print new_color
+                    logger.info("last cached build id is %s" % last_cached_build_id)
+                    build_info = self._get_last_cached_build_info(last_cached_build_id)
+                    current_builder_build_state = self._get_builder_build_state_from_build_info(build_info)
+                    logger.info("last cached buildmaster builder build state is %s" % current_builder_build_state)
+
+                    new_color = self._get_color_by_state(current_builder_build_state)
                     if new_color:
                         self._update_hue_light(new_color)
 
-
                 self._cached_buildmaster_builder_state = current_buildmaster_builder_state
-
 
             time.sleep(self._poller_interval_in_sec)
 
@@ -266,14 +299,10 @@ class BuildMasterBuilderPoller(object):
         if _buildmaster_builder_state == BuildMasterBuilderState.IDLE:
             return None
 
-
-
     @classmethod
     def signal_handler(cls, signum, frame):
         logger.info("got signal, lets exit")
         BuildMasterBuilderPoller.GLOBAL_RUN_FLAG = False
-
-
 
 def _main(_cli_arguments):
     """main function to handle command line arguments"""

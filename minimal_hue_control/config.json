@@ -1,20 +1,22 @@
 {
     "poller": {
-        "interval_in_sec": 5
+        "interval_in_sec": 5,
+        "build_fail_string": "compile",
+        "test_fail_string": "python"
     },
     "hue": {
-        "user": "neratecdev",
+        "user": "1234",
         "address": "192.168.11.49",
-        "light_name" : "bbs1"
+        "light_name" : "light1"
     },
     "buildmaster": {
-        "address": "https://openwrt.neratec.com/buildbot",
-        "builder": "DT50_Alstom"
+        "address": "https://openwrt.com/buildbot",
+        "builder": "software_builder"
     },
     "color_state_matcher": {
         "building": "YELLOW",
         "success" : "GREEN",
-        "build_failed": "RED",
+        "compile_failed": "RED",
         "test_failed": "MAGENTA",
         "unknown_failed" : "BLUE"
     }

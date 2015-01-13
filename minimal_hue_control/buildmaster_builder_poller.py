@@ -69,6 +69,8 @@ class BuildMasterBuilderPoller(object):
         self._my_minimal_hue_control = None
         self._cached_buildmaster_builder_state = None
         self._poller_interval_in_sec = self.DEFAULT_POLL_INTERVAL_IN_SEC
+        self._poller_build_fail_string = None
+        self._poller_test_fail_string = None
 
     def log_current_configuration(self):
         """function to log the current configuration
@@ -95,6 +97,10 @@ class BuildMasterBuilderPoller(object):
         if "poller" in config_data:
             if "interval_in_sec" in config_data["poller"]:
                 self._poller_interval_in_sec = config_data["poller"]["interval_in_sec"]
+            if "build_fail_string" in config_data["poller"]:
+                self._poller_build_fail_string = config_data["poller"]["build_fail_string"]
+            if "test_fail_string" in config_data["poller"]:
+                self._poller_test_fail_string = config_data["poller"]["test_fail_string"]
 
         if "hue" in config_data:
             if "address" in config_data["hue"]:
@@ -202,9 +208,11 @@ class BuildMasterBuilderPoller(object):
 
         return json_data
 
-    @classmethod
-    def _get_builder_build_state_from_build_info(cls, _build_info):
+    def _get_builder_build_state_from_build_info(self, _build_info):
         """parse build info to get build state
+
+        here we try to find the strings in self._poller_test_fail_string and self._poller_build_fail_string in the
+        failed test steps to find out what failed, tests or build.
 
         user curl on the command line to analyze the data:
             curl -X GET -H "Content-type: application/json" https://openwrt.neratec.com/buildbot/json/builders/YOURBUILDER/builds/42 | python -m json.tool | less
@@ -220,16 +228,21 @@ class BuildMasterBuilderPoller(object):
             # why did it fail? tests or build or something unknown
             for step in _build_info["steps"]:
 
-                # failing compile step (buildbot naming)
-                if "failed" in step["text"] and "compile" in step["text"]:
+                # skip the successful completed steps
+                if "failed" not in step["text"]:
+                    continue
+
+                logging.debug("first failing step: %s", step["text"])
+                logging.debug("full failing step dump: %s", step)
+
+                # detect failing build step
+                if self._poller_build_fail_string in step["text"]:
                     return BuildMasterBuilderStepState.COMPILE_FAILED
 
-                # check for tests failing python tests
-                # there was an issue with the tokens,
-                if "failed" in step["text"]:
-                    for token in step["text"]:
-                        if "python" in token:
-                            return BuildMasterBuilderStepState.TEST_FAILED
+                # detect failing test steps
+                # NOTE: strip ' here, its part of the first token
+                if self._poller_test_fail_string in [element.strip("'") for element in step["text"]]:
+                    return BuildMasterBuilderStepState.TEST_FAILED
 
             # default fail, show unknown fail pattern
             return BuildMasterBuilderStepState.UNKNOWN_FAILED

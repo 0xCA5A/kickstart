@@ -80,9 +80,8 @@ class BuildMasterBuilderPoller(object):
         :return: None
         """
         logger.info("current configuration")
-
         interesting_class_variable_prefix = ("_hue", "_buildmaster", "_color", "_poller")
-        for key in self.__dict__.keys():
+        for key in sorted(self.__dict__.keys()):
             if key.startswith(interesting_class_variable_prefix):
                 logging.info(" * %s: %s", key, self.__dict__[key])
 

@@ -1,0 +1,3 @@
+[submodule "minimal_hue_control/phue"]
+	path = minimal_hue_control/phue
+	url = https://github.com/studioimaginaire/phue

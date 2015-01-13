@@ -1,0 +1,21 @@
+{
+    "poller": {
+        "interval_in_sec": 5
+    },
+    "hue": {
+        "user": "neratecdev",
+        "address": "192.168.11.49",
+        "light_name" : "bbs1"
+    },
+    "buildmaster": {
+        "address": "https://openwrt.neratec.com/buildbot",
+        "builder": "DT50_Alstom"
+    },
+    "color_state_matcher": {
+        "building": "YELLOW",
+        "success" : "GREEN",
+        "build_failed": "RED",
+        "test_failed": "MAGENTA",
+        "unknown_failed" : "BLUE"
+    }
+}

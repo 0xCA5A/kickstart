@@ -88,7 +88,6 @@ class BuildMasterBuilderPoller(object):
             if "interval_in_sec" in config_data["poller"]:
                 self._poller_interval_in_sec = config_data["poller"]["interval_in_sec"]
 
-
         if "hue" in config_data:
             if "address" in config_data["hue"]:
                 self._hue_bridge_address = config_data["hue"]["address"]
@@ -152,7 +151,7 @@ class BuildMasterBuilderPoller(object):
         json_data = json.loads(buf.getvalue())
         buf.close()
 
-        # return biggest number in list
+        # return highest number in list
         cached_builds = json_data["cachedBuilds"]
         return max(map(int, cached_builds))
 

@@ -13,8 +13,5 @@ alias kate='/usr/bin/kate 2>&- 1>&-'
 alias makemp='make -j $(nproc)'
 alias find_tab_files_recursive='grep -rP '\t' | cut -d ':' -f 1 | sort | uniq | grep -v Binary'
 alias lock='dm-tool lock'
-
-
-
-
+alias mute='amixer -q -D pulse sset Master toggle'
 ```

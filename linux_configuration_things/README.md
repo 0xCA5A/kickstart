@@ -14,4 +14,8 @@ alias makemp='make -j $(nproc)'
 alias find_tab_files_recursive='grep -rP '\t' | cut -d ':' -f 1 | sort | uniq | grep -v Binary'
 alias lock='dm-tool lock'
 alias mute='amixer -q -D pulse sset Master toggle'
+
+alias keyboard_us='setxkbmap -model pc105 -layout us -variant intl -option nodeadkeys'
+alias keyboard_ch='setxkbmap -model pc105 -layout ch -variant de -option nodeadkeys'
+
 ```

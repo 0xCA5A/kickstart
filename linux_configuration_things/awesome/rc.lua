@@ -10,6 +10,8 @@ require("naughty")
 -- Load Debian menu entries
 require("debian.menu")
 
+require("vicious")
+
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
@@ -37,7 +39,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
-beautiful.init("/usr/share/awesome/themes/default/theme.lua")
+beautiful.init("/usr/share/awesome/themes/zenburn/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "x-terminal-emulator"
@@ -74,7 +76,7 @@ layouts =
 tags = {}
 for s = 1, screen.count() do
     -- Each screen has its own tag table.
-    tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
+    tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
 end
 -- }}}
 
@@ -168,6 +170,20 @@ for s = 1, screen.count() do
                                               return awful.widget.tasklist.label.currenttags(c, s)
                                           end, mytasklist.buttons)
 
+    -- Initialize widget
+    myseparator = widget({ type = "textbox" })
+    myseparator.text  = " ::"
+
+    -- Initialize widget
+    mycpuwidget = widget({ type = "textbox" })
+    -- Register widget
+    vicious.register(mycpuwidget, vicious.widgets.cpu, " CPU: $1%")
+
+    -- Initialize widget
+    mymemwidget = widget({ type = "textbox" })
+    -- Register widget
+    vicious.register(mymemwidget, vicious.widgets.mem, " MEM: $1% ($2MB / $3MB)")
+
     -- Create the wibox
     mywibox[s] = awful.wibox({ position = "top", screen = s })
     -- Add widgets to the wibox - order matters
@@ -180,6 +196,10 @@ for s = 1, screen.count() do
         },
         mylayoutbox[s],
         mytextclock,
+        myseparator,
+        mymemwidget,
+        myseparator,
+        mycpuwidget,
         s == 1 and mysystray or nil,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -197,6 +217,12 @@ root.buttons(awful.util.table.join(
 
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
+    
+    -- my key bindings
+    awful.key({ modkey,           }, "F12", function () awful.util.spawn("dm-tool lock") end),
+    awful.key({                   }, "Print", function () awful.util.spawn("scrot -e 'mv $f ~/screenshots/ 2>/dev/null'") end),
+
+    -- default key bindings
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
     awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),

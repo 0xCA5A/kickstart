@@ -22,8 +22,8 @@ import subprocess
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(name)-15s %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-_LATEX_SRC_FILE = 'images.tex'
-_LATEX_OUT_FILE = 'images.pdf'
+_LATEX_SRC_FILE = 'all_images.tex'
+_LATEX_OUT_FILE = 'all_images.pdf'
 
 if __name__ == '__main__':
 
@@ -69,14 +69,18 @@ if __name__ == '__main__':
 
     with open(_LATEX_SRC_FILE, 'w+') as latex_source_file:
         latex_source_file.write("\documentclass[a4paper]{article}\n")
+        latex_source_file.write("\\usepackage[utf8]{inputenc}")
         latex_source_file.write("\\usepackage[cm]{fullpage}\n")
         latex_source_file.write("\\usepackage{graphicx}\n")
         latex_source_file.write("\\begin{document}\n")
+        latex_source_file.write("\\begin{center}\n")
 
         for image_file_path in image_file_path_list:
             latex_source_file.write("\includegraphics[width=%f\\textwidth]{%s}\n" % (float(cfg["scale_factor"]), image_file_path))
             latex_source_file.write("\\newline")
+            latex_source_file.write("\\vfill")
 
+        latex_source_file.write("\\end{center}\n")
         latex_source_file.write("\end{document}\n")
 
     subprocess.call(["/usr/bin/pdflatex", _LATEX_SRC_FILE])
